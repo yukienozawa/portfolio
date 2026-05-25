@@ -1,0 +1,56 @@
+name: ✅ 実行報告
+description: 完了したタスクや作業内容の詳細を報告・記録します
+title: "[REPORT]: "
+labels: ["report", "task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        作業お疲れ様です！実施した内容をチームや自分自身の備忘録として記録してください。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 作業概要
+      description: 何を行ったか簡潔に説明してください。
+      placeholder: 例：APIの認証ロジックの実装完了
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: 作業詳細
+      description: 具体的にどのような変更を行ったか、工夫した点や注意点があれば記述してください。
+      placeholder: |
+        - 〇〇ライブラリを導入して△△の処理を効率化
+        - DBのスキーマ変更に伴うマイグレーションの実行
+  - type: dropdown
+    id: status
+    attributes:
+      label: 進捗状況
+      options:
+        - 完了（マージ準備OK）
+        - 一部完了（継続タスクあり）
+        - 調査/検証完了
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 実行・確認環境
+      options:
+        - ローカル開発環境
+        - ステージング（検証）環境
+        - 本番環境
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: 確認事項
+      options:
+        - label: セルフレビュー（コードの見直し）を実施した
+        - label: ローカル環境での正常動作を確認した
+        - label: 関連する既存機能への影響がないことを確認した
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考・ネクストアクション
+      description: 次にやるべきことや、残っている懸念点があれば記載してください。

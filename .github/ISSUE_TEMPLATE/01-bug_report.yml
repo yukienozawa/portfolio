@@ -1,0 +1,49 @@
+name: 🐛 バグ報告
+description: 問題の報告をして、改善に役立てます
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        バグの報告ありがとうございます！以下の項目を埋めてください。
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 問題の内容
+      description: 何が起きましたか？
+      placeholder: 例：ログインボタンを押しても反応しない
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 再現手順
+      description: どのようにすればその問題が発生するか詳しく書いてください
+      placeholder: |
+        1. ログイン画面を開く
+        2. メールアドレスを入力する
+        3. ログインボタンをクリックする
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 発生環境
+      options:
+        - フロントエンド (React/Vue/HTML等)
+        - バックエンド (Node.js/Python/Ruby等)
+        - データベース
+        - インフラ/デプロイ関連
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 期待される動作
+      placeholder: 本来はどう動くべきでしたか？
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 確認事項
+      options:
+        - label: 最新のコードで再現することを確認しました
+          required: true

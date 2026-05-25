@@ -1,0 +1,34 @@
+name: 📝 作業ログ・進捗管理
+description: 現在取り組んでいるタスクの進捗を管理します
+title: "[TASK]: "
+labels: ["in-progress"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 今回の目標
+      description: このIssueで何を達成しようとしていますか？
+      placeholder: 例：ユーザー登録機能のバリデーション実装
+    validations:
+      required: true
+  - type: checkboxes
+    id: tasks
+    attributes:
+      label: タスクリスト
+      options:
+        - label: アーチテクスチャ図作成（.jpeg）
+        - label: システムフロー図作成（.md）
+        - label: 例.フロントエンドのフォーム作成
+        - label: 例.バリデーションロジックの実装
+        - label: 例.テストコードの作成
+        - label: 例.実機での動作確認
+  - type: textarea
+    id: current-status
+    attributes:
+      label: 現在の状況・詰まっている点
+      description: 現在の進捗や、悩んでいることがあれば書いてください。
+  - type: textarea
+    id: resources
+    attributes:
+      label: 参考資料
+      description: 参考にしたドキュメントや記事のURLを貼ってください。

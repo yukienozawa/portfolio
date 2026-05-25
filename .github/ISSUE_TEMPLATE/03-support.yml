@@ -1,0 +1,17 @@
+name: ❓ 質問・不明点
+description: 技術的な質問や、プロジェクトに関する不明点を確認します
+title: "[Q&A]: "
+labels: ["question"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: 質問の内容
+      description: 何について知りたいですか？
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: 試したこと
+      description: すでに自分で調べて試したこと、参考にしたURLなどがあれば書いてください。
