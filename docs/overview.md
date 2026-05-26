@@ -2,7 +2,7 @@
 name: Project Overview and Architecture Setup
 about: ポートフォリオ全体像、技術スタック、開発フローおよびAIへの制約事項の定義
 title: '[Doc] ポートフォリオ概要・技術構成の策定'
-labels: documentation, setup
+labels: 'scope: docs, type: setup'
 assignees: ''
 ---
 
@@ -27,7 +27,7 @@ assignees: ''
 | **ORM** | Prisma | スキーマ駆動開発 |
 | **Database** | MySQL | 開発時はローカルまたはコンテナ、本番はAWS（RDS） |
 | **Auth** | Firebase Authentication | Admin SDKを用いたバックエンド/Middleware認可 |
-| **Linter/Formatter**| ESLint (Airbnb), Prettier | コード品質の自動統一 |
+| **Linter/Formatter**| ESLint (Airbnb), Prettier | 代码品質の自動統一 |
 | **Cache** | Redis | ※Advanced要件（MVP完成後に導入判断） |
 
 ---
@@ -50,12 +50,12 @@ graph TD
     classDef phase4 fill:#fbb,stroke:#333,stroke-width:2px;
     classDef phase5 fill:#ffb,stroke:#333,stroke-width:2px;
 
-    %% Phase 1: 基盤構築
+    %% Phase 1: 基盤構築（★完了！）
     P1_1[タスク1: プロジェクト初期化] --> P1_2[ESLint Airbnb / Prettier設定]
     P1_2 --> P2_1[タスク2: Prisma Schema定義 User/Achievement/Skill]
     class P1_1,P1_2 phase1;
 
-    %% Phase 2: データ・認証基盤
+    %% Phase 2: データ・認証基盤（★現在地）
     P2_1 --> P2_2[MySQLテーブル作成 npx prisma db push]
     P2_2 --> P3_1[タスク3: Firebase Admin SDK導入]
     P3_1 --> P3_2[認可Middleware実装 未認証時404応答]
@@ -78,20 +78,3 @@ graph TD
     P6_2 --> P7_1[最適化: Redisキャッシュ導入検討]
     P7_1 --> P7_2[デプロイ: AWS環境への構築 HTTPS化]
     class P6_1,P6_2,P7_1,P7_2 phase5;
-```
-5. AIへの注意点
-コンテキストの厳守: 上記フロー以外の自己判断による機能追加（不要なライブラリ導入など）は行わないでください。
-
-エラー処理: 認証エラー時の挙動は一般的な401/403ではなく、404応答が仕様です。
-
-6. 未確定事項
-画像保存の効率: 初期要件としてMySQL（Blob/Base64）に保存しますが、将来的なストレージ肥大化への具体策（S3等への移行トリガー）は未定です。
-
-Redisの導入タイミング: パフォーマンス課題が明確になった時点で再判断します（現段階では実装不要）。
-
-テストの自動化範囲: Firebase Emulatorを利用するか、Mockで対応するかは未確定です。
-
-7. TODO
-- [ ] リポジトリの初期化と develop ブランチの作成
-- [ ] ESLint（Airbnb）および Prettier の導入と動作確認
-- [ ] 初期設計ドキュメントの配置（docs/ 配下）
