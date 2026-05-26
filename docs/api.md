@@ -1,141 +1,81 @@
-# API設計書（家計簿アプリ）
+---
+name: API Specification draft
+about: バックエンド（Express）が提供するエンドポイントの定義およびリクエスト・レスポンス案
+title: '[Doc] APIエンドポイントおよびインターフェース定義'
+labels: api, design
+assignees: ''
+---
 
-## 1. リソース定義
+## 1. API候補一覧
+公開用API、管理画面用API、外部連携APIに分類して定義します。
 
-- **transactions**: 取引データ（レシート単位）。1つの取引の中に複数の明細（details）を持ちます。
-- **categories**: 収支の分類マスター。支出（1）と収入（0）を区別して管理します。
-- **accounts**: 支払元・受取先の口座マスター（財布、銀行、カード等）。
+### 認証・認可ポリシー
+- **公開API**: 認証不要。誰でもアクセス可能。
+- **Admin専用API**: Firebase AuthのIDトークン検証が必須。管理者権限がない、または未認証の場合は **HTTP 404** を返却し、エンドポイント自体の存在を隠匿します。
 
-## 2. エンドポイント定義
+---
 
-### Transactions（取引リソース）
+## 2. エンドポイント詳細
 
-| メソッド | パス              | 挙動                 | 成功ステータス |
-| :------- | :---------------- | :------------------- | :------------- |
-| GET      | /transactions     | 取引一覧の取得       | 200            |
-| GET      | /transactions/:id | 特定の取引の詳細取得 | 200            |
-| POST     | /transactions     | 新規取引の登録       | 201            |
-| PUT      | /transactions/:id | 既存取引の更新       | 200            |
-| DELETE   | /transactions/:id | 取引の削除           | 204            |
+### ① 実績一覧の取得
+* **Endpoint**: `GET /api/achievements`
+* **認証要否**: 不要（公開）
+* **Request**: なし
+* **Response (200)**:
+    ```json
+    [
+      {
+        "id": 1,
+        "achievementTitle": "ECサイトリニューアル",
+        "description": "フロントエンドのNext.js移行を担当。",
+        "imageData": "data:image/png;base64,iVBORw0KGgoAAA...",
+        "createdAt": "2026-05-26T02:30:00.000Z"
+      }
+    ]
+    ```
 
-### Categories（カテゴリリソース）
+### ② 実績の新規登録
+* **Endpoint**: `POST /api/admin/achievements`
+* **認証要否**: **必要（Adminのみ）**
+* **Request Headers**:
+    ```http
+    Authorization: Bearer <Firebase_ID_Token>
+    ```
+* **Request Body**:
+    ```json
+    {
+      "achievementTitle": "新規モジュール開発",
+      "description": "Expressを用いたマイクロサービスの実装。",
+      "imageData": "data:image/png;base64,iVBORw0KGgoAAA..."
+    }
+    ```
+* **Response (201)**:
+    ```json
+    {
+      "id": 2,
+      "achievementTitle": "新規モジュール開発",
+      "success": true
+    }
+    ```
+* **エラーレスポンス (未認証・権限不足時)**:
+    * **Status**: `404 Not Found` （※セキュリティ要件に基づく存在隠蔽）
 
-| メソッド | パス            | 挙動                       | 成功ステータス |
-| :------- | :-------------- | :------------------------- | :------------- |
-| GET      | /categories     | カテゴリ一覧の取得         | 200            |
-| POST     | /categories     | 新規カテゴリの追加         | 201            |
-| PUT      | /categories/:id | カテゴリ名の更新・並び替え | 200            |
-| DELETE   | /categories/:id | カテゴリの削除             | 204            |
-
-### Accounts（口座リソース）
-
-| メソッド | パス          | 挙動                         | 成功ステータス |
-| :------- | :------------ | :--------------------------- | :------------- |
-| GET      | /accounts     | 口座・決済手段の一覧取得     | 200            |
-| PUT      | /accounts/:id | 口座情報の更新（残高調整等） | 200            |
-
-## 3. データ構造 (JSON)
-
-現在 `db.json` で管理している以下の構造を正（マスター）とします。
-
-### 詳細定義
-
-### ### Transaction（取引データ：全体）
-
-| 項目          | 型                       | 内容          | 備考                               |
-| :------------ | :----------------------- | :------------ | :--------------------------------- |
-| `id`          | string                   | 取引ID        | 一意識別子                         |
-| `type`        | number                   | 収支タイプ    | 0: 収入 / 1: 支出                  |
-| `date`        | string                   | 取引日        | YYYY-MM-DD 形式                    |
-| `storeId`     | string \| number \| null | 店名 / 収入元 | 直接入力(string) または マスターID |
-| `accountId`   | string \| number \| null | 口座ID        | 支払元・受取先のID                 |
-| `details`     | array                    | 明細リスト    | `InputRow` 型の配列                |
-| `totalAmount` | number                   | 合計金額      | 全明細の合計金額                   |
-| `createdAt`   | string                   | 作成日時      | ISO 8601形式（任意）               |
-| `updatedAt`   | string                   | 更新日時      | ISO 8601形式（任意）               |
-
-※`storeId`は、リスト選択、もしくは直接文字入力のケースが発生する。
-
-### ### InputRow（取引明細：1行分）
-
-| 項目         | 型     | 内容       | 備考                 |
-| :----------- | :----- | :--------- | :------------------- |
-| `id`         | string | 明細ID     | 取引内で一意なID     |
-| `itemName`   | string | 品目名     | 購入したものの名前   |
-| `categoryId` | string | カテゴリID | カテゴリマスターのID |
-| `amount`     | number | 単価       |                      |
-| `quantity`   | number | 数量       | 必須（初期値 1）     |
-| `memo`       | string | 備考       | 任意（最大30文字）   |
-
-### ### Category（カテゴリ設定）
-
-| 項目        | 型     | 内容       | 備考                     |
-| :---------- | :----- | :--------- | :----------------------- |
-| `id`        | string | カテゴリID |                          |
-| `name`      | string | カテゴリ名 |                          |
-| `type`      | number | 収支タイプ | 0: 収入 / 1: 支出        |
-| `sortOrder` | number | 並び順     | 数値が小さいほど上に表示 |
-
-### ### Accounts（口座マスター/決済手段）
-
-| 項目        | 型               | 内容   | 備考                       |
-| :---------- | :--------------- | :----- | :------------------------- |
-| `id`        | string \| number | 口座ID |                            |
-| `name`      | string           | 口座名 | 現金、銀行名、カード名など |
-| `sortOrder` | number           | 並び順 | 数値が小さいほど上に表示   |
-
-### 4. エラーレスポンス定義
-
-不正なデータ形式のリクエストや、存在しないリソースへのアクセスがあった場合は、以下のステータスコードとJSON形式でエラーを返却します。
-
-| ステータス | エラー種別            | 挙動 / 内容                                                                                                                                                                                     |
-| :--------- | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 400        | Bad Request           | **不正なデータ。** <br>・必須項目（date, type, totalAmount 等）の不足。<br>・**収支タイプ（type）が 0（収入）または 1（支出）以外の数値。**<br>・金額（amount）に数値以外が入力されている場合。 |
-| 404        | Not Found             | **未検出。** <br>指定されたID（取引ID、カテゴリIDなど）がデータベース上に存在しない場合に返却します。                                                                                           |
-| 500        | Internal Server Error | **サーバーエラー。** <br>予期せぬ不具合が発生した際に共通のエラーとして返却。                                                                                                                   |
-
-### エラーレスポンスの構造（JSON）
-
-クライアント側（フロントエンド）でエラー内容を表示できるよう、一貫した形式で返却します。
-
-```json
-{
-  "status": "error",
-  "error": "Invalid Data Format",
-  "message": "金額(amount)は数値で入力してください。"
-}
-```
-
-## 5. クエリパラメータ（絞り込み・検索）
-
-履歴画面（History）での柔軟な表示や統計処理に対応するため、`GET /transactions` では以下のパラメータを受け付けます。
-
-| パラメータ   | 型     | 内容                           | 例                      |
-| :----------- | :----- | :----------------------------- | :---------------------- |
-| `startDate`  | string | 取得開始日 (YYYY-MM-DD)        | `?startDate=2026-05-01` |
-| `endDate`    | string | 取得終了日 (YYYY-MM-DD)        | `?endDate=2026-05-31`   |
-| `type`       | number | 収支タイプ (0: 収入 / 1: 支出) | `?type=1`               |
-| `categoryId` | string | カテゴリIDによる絞り込み       | `?categoryId=cat-001`   |
-
-## 6. バリデーションの厳格な定義
-
-不正なデータの登録を防ぎ、アプリの動作を安定させるため、バックエンド（Express）側で以下のルールに基づいたバリデーションを実施します。
-
-### 取引登録 (POST/PUT) 時のバリデーションルール
-
-- **date（日付）**:
-  - 必須項目。
-  - 正しい日付形式（YYYY-MM-DD）であること。
-- **amount（金額）**:
-  - 必須項目。
-  - **数値(number)** 型であること（文字列はNG）。
-- **type（タイプ）**:
-  - 必須項目。
-  - 0（収入）または 1（支出）の数値であること。
-- **memo（メモ）**:
-  - 任意項目（空文字可）。
-  - **最大30文字以内** であること（家計簿の視認性を保つため）。
-
-### エラー時のレスポンス
-
-バリデーションに失敗した場合は、ステータスコード **400 Bad Request** と共に、詳細なエラー原因を返却します。
+### ③ 問い合わせ送信
+* **Endpoint**: `POST /api/contact`
+* **認証要否**: 不要（公開）
+* **Request Body**:
+    ```json
+    {
+      "senderName": "山田 太郎",
+      "senderEmail": "yamada@example.com",
+      "messageContent": "お仕事のご相談です。"
+    }
+    ```
+* **Response (200)**:
+    ```json
+    {
+      "success": true,
+      "message": "Inquiry received successfully."
+    }
+    ```
+* **内部挙動**: DB（Inquiriesテーブル）へテキストデータとして蓄積後、Slack等のWebhook通知をリアルタイムにトリガーします。
