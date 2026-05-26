@@ -2,7 +2,7 @@
 name: Database Schema Design
 about: Prisma を使用した MySQL テーブル構造とモデルの定義
 title: '[Doc] DB設計およびPrisma Schema候補の定義'
-labels: database, prisma
+labels: 'scope: docs, type: setup'
 assignees: ''
 ---
 
@@ -13,8 +13,8 @@ assignees: ''
 
 ---
 
-## 2. Prisma Model 候補
-以下を `prisma/schema.prisma` の構成案とします。
+## 2. Prisma Schema 構成案
+プロジェクトの `api/prisma/schema.prisma` の中身を以下の構成とします。
 
 ```prisma
 datasource db {
@@ -23,16 +23,17 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-client-js"
+  provider = "prisma-client-js"
 }
+
 
 /// ユーザー管理モデル（管理者認証用）
 model User {
-  id        Int      @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   firebaseId String   @unique // Firebase Authのuidとマッピング
   userEmail  String   @unique
-  role      UserRole @default(GUEST)
-  createdAt DateTime @default(now())
+  role       UserRole @default(GUEST)
+  createdAt  DateTime @default(now())
 }
 
 /// 実績コンテンツモデル
@@ -61,18 +62,8 @@ model Inquiry {
   receivedAt     DateTime @default(now())
 }
 
-```
----
-
-## 3. Enum 候補
-コード スニペット
+/// 権限定義の列挙型
 enum UserRole {
   ADMIN
   GUEST
 }
----
-
-## 4. リレーション案（未確定事項）
-現状、Achievement や Skill に対する作成者の紐付け（User との 1:N リレーション）はMVP要件に含まれていません。
-
-管理者が1名のみ（固定）の運用を想定しているため、現状は独立したテーブル群としてシンプルに構成します。必要に応じて将来拡張します。

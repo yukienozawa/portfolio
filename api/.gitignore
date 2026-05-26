@@ -1,0 +1,11 @@
+node_modules/
+build/
+dist/
+
+# 環境変数（Prismaの接続URLなどが入る本番NGファイル）
+.env
+
+# ログやキャッシュ
+*.log
+.eslintcache
+.DS_Store
