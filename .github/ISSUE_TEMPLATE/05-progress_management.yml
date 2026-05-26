@@ -18,6 +18,9 @@ body:
       options:
         - label: アーチテクスチャ図作成（.jpeg）
         - label: システムフロー図作成（.md）
+        - label: \docsの各.mdファイル作成
+        - label: issueの作成
+        - label: README.mdファイル作成
         - label: 例.フロントエンドのフォーム作成
         - label: 例.バリデーションロジックの実装
         - label: 例.テストコードの作成

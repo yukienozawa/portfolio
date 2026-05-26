@@ -1,53 +1,69 @@
-### `docs/db.md` 
-# データベース設計書（Prisma/MySQL）
+---
+name: Database Schema Design
+about: Prisma を使用した MySQL テーブル構造とモデルの定義
+title: '[Doc] DB設計およびPrisma Schema候補の定義'
+labels: 'scope: docs, type: setup'
+assignees: ''
+---
 
-Prisma ORMによるMySQLのスキーマ定義、およびリレーション構造を厳格に定義します。
+## 1. データベース方針
+- **ORM**: Prisma を使用。
+- **命名規則**: MDN推奨のキャメルケースを適用し、短縮形を避けたセマンティックな名称（例: `achievementTitle`）を採用します。
+- **画像保持**: MVPフェーズではMySQL内にバイナリ/Base64（文字列またはBlob）として直接格納します。
 
-## 1. モデル定義
+---
 
-### 📄 Transaction（取引テーブル）
-レシート単位の親データを管理します。
-- `id` (String): 主キー（UUID等）。
-- `type` (Int): 収支タイプ。`0`: 収入 / `1`: 支出。
-- `date` (String): 取引日。`YYYY-MM-DD` 形式。
-- `storeId` (String?): 暫定的にオプショナル。マスター移行後はStoreモデルとリレーション。
-- `accountId` (String): 口座マスター（Account）への外部キー。
-- `totalAmount` (Int): 全明細の合計金額。
-- `createdAt` (DateTime): 作成日時。デフォルトは `now()`。
-- `updatedAt` (DateTime): 更新日時。`@updatedAt` による自動更新。
+## 2. Prisma Schema 構成案
+プロジェクトの `api/prisma/schema.prisma` の中身を以下の構成とします。
 
-### 📄 TransactionDetail（取引明細テーブル）
-取引に紐づく1行ごとの品目データを管理します。
-- `id` (String): 主キー。
-- `transactionId` (String): 取引（Transaction）への外部キー。
-- `itemName` (String): 品目名。
-- `categoryId` (String): カテゴリマスター（Category）への外部キー。
-- `amount` (Int): 単価（正の整数）。
-- `quantity` (Int): 数量。初期値は `1`。
-- `memo` (String?): 備考。最大30文字以内。
+```prisma
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
 
-### 📄 Category（カテゴリマスター）
-- `id` (String): 主キー。
-- `name` (String): カテゴリ名。
-- `type` (Int): 収支タイプ。`0`: 収入 / `1`: 支出。
-- `sortOrder` (Int): 並び順。数値が小さいほど上位表示。
+generator client {
+  provider = "prisma-client-js"
+}
 
-### 📄 Account（口座マスター）
-- `id` (String): 主キー。
-- `name` (String): 口座名。
-- `sortOrder` (Int): 並び順。数値が小さいほど上位表示。
 
-## 2. リレーション案（Prisma定義ベース）
+/// ユーザー管理モデル（管理者認証用）
+model User {
+  id         Int      @id @default(autoincrement())
+  firebaseId String   @unique // Firebase Authのuidとマッピング
+  userEmail  String   @unique
+  role       UserRole @default(GUEST)
+  createdAt  DateTime @default(now())
+}
 
-- **Transaction と TransactionDetail**: `1 : 複（一対多）`
-  - 取引（親）が削除された場合、紐づく明細（子）も連動して自動削除される（`onDelete: Cascade`）。
-- **Account と Transaction**: `1 : 複（一対多）`
-  - 口座は複数の取引に紐づきます。
-- **Category と TransactionDetail**: `1 : 複（一対多）`
-  - 各明細は必ず1つのカテゴリに属します。
+/// 実績コンテンツモデル
+model Achievement {
+  id               Int      @id @default(autoincrement())
+  achievementTitle String   // MDNに準拠したセマンティックなキャメルケース
+  description      String   @db.Text
+  imageData        String   @db.LongText // Blob型、またはBase64文字列
+  createdAt        DateTime @default(now())
+}
 
-## 3. enum案 (Prismaにおける制約)
-MySQLのパフォーマンスと厳格な型安全を両立するため、アプリケーション側では以下の整数値（`Int`）としてマッピングします。
-- **収支タイプ（Type）**:
-  - `0`: 収入 (INCOME)
-  - `1`: 支出 (EXPENSE)
+/// スキル管理モデル
+model Skill {
+  id         Int      @id @default(autoincrement())
+  skillName  String   @unique
+  skillLevel String   // 例: "Advanced", "Intermediate"
+  createdAt  DateTime @default(now())
+}
+
+/// お問い合わせデータモデル
+model Inquiry {
+  id             Int      @id @default(autoincrement())
+  senderName     String
+  senderEmail    String
+  messageContent String   @db.Text
+  receivedAt     DateTime @default(now())
+}
+
+/// 権限定義の列挙型
+enum UserRole {
+  ADMIN
+  GUEST
+}

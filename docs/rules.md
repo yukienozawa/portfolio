@@ -1,33 +1,45 @@
-### `docs/rules.md` 
-# 開発規約 & コーディングルール（Development Rules）
+---
+name: Development and Coding Standards
+about: TypeScript, ESLint, Prisma, Git運用およびAIへの制約ルールの定義
+title: '[Doc] 開発規約・AI実装禁止事項の策定'
+labels: 'scope: docs, type: setup'
+assignees: ''
+---
 
-## 1. 厳格な型安全（TypeScript）
-* **`any` の完全禁止**
-  * コード内での `any` 使用は一切禁止
-  * 型が不明なエラー等は必ず `unknown` を使い、`instanceof Error` で型ガードする
-* **インデントルールの厳守**
-  * ESLint Flat Config に従い、不要なスペースやネストを排除した「左寄せインデント」を徹底する
+## 1. コーディング・型規約
+コードの品質自動統一のため、以下のルールを厳格に適用します。
 
-## 2. Prisma（ORM）操作ルール
-* **環境変数の生書き禁止**
-  * `new PrismaClient()` の引数は空（デフォルト）にする
-  * 接続URLはハードコーディングせず、Dockerから注入される `DATABASE_URL` に自動検知させる
-* **リレーション取得の明確化**
-  * 取引（Transaction）取得時は、必ず `include: { details: true }` で明細を同時結合（Eager Loading）する
+### Strict TypeScript
+- `tsconfig.json` で `strict: true` を必須とします。
+- **`any` 禁止令**: `any` 型の使用は全面的に禁止します。型定義が困難な場合は、適切なジェネリクス、ユニオン型、または `unknown` 型を用いた型ガードを実装してください。
 
-## 3. 最小変更原則（YAGNIの徹底）
-* **先回りの実装禁止**
-  * 「将来使うかもしれない」という予測での不要な関数、拡張コード、未使用の型定義の追加は一切禁止
-  * 今あるMVP仕様（設計書）を満たすためだけの「最小・最簡」の変更に留める
+### ESLint & Prettier
+- **Airbnb JavaScript Style Guide** を基盤としたESLintルールを適用します。
+- 保存時の自動整形、およびコミット前のLintチェックを設定します。
 
-## 4. 静的解析（Lint/Format）の強制
-* **エラーゼロの義務化**
-  * コミット前、動作確認前には必ずコンテナ内から以下を実行し、Warningおよびエラーが「ゼロ」であることを確認する
-  ```bash
-  # バックエンドの検証
-  docker compose exec api npm run lint
-  docker compose exec api npm run format
+### 命名規則（重要）
+- 機械的な文字数制限（12文字以内など）ではなく、**MDN公式ガイドライン**に準拠します。
+- **「3〜10文字程度を目安としつつ、略称を避けて人間が理解できる具体的な名前（セマンティックな命名）」**を徹底してください。
+  * ❌ 悪い例: `acvTitle` (略しすぎ), `aT` (意味不明), `achievementTitleName` (冗長)
+  * ⭕ 良い例: `achievementTitle`, `senderName`, `senderEmail`, `skillLevel`
 
-  # フロントエンドの検証
-  docker compose exec next npm run lint
-  docker compose exec next npm run format
+---
+
+## 2. Prisma 運用ルール
+- スキーマ変更時は、必ず **`api/prisma/schema.prisma`** を修正した上でマイグレーションを生成、または `npx prisma db push` を実行してください。
+- 自動生成されるPrismaクライアントの型をフロントエンド（`front`）とバックエンド（`api`）で正しく共有し、二重定義を避けてください。
+
+---
+
+## 3. Git運用戦略
+迅速な開発と秩序の両立のため、以下の2種類のブランチのみで運用します。
+- **`develop`**: 統合用ブランチ。ステージング・動作確認の基準。
+- **`feature/機能名`**: 作業用ブランチ。必ず `develop` から切り出し、完了後は `develop` へプルリクエスト（PR）を作成します。
+
+---
+
+## 4. AI実装時禁止事項・最小変更原則
+AI（CursorやGemini等）が自律実装、またはコード生成を行う際、以下の行為を厳格に禁止します。
+1. **「一度に広範囲のファイルを書き換える行為」の禁止**: 必ずIssueまたはタスク（タスク1, 2, 3...）の単位に細分化して実装をコミットしてください。
+2. **未定義の外部依存関係の勝手な追加**: 新しいパッケージをインストールする場合は、必ず事前に確認を得るか、`package.json` の想定範囲内に収めてください。
+3. **プレースホルダーコードの禁止**: `// TODO: あとで実装する` や `// ...既存のコード...` などの省略・未実装コードを含んだ状態でのタスク完了報告を禁止します。

@@ -1,0 +1,33 @@
+services:
+  # 🗄️ メインデータベース (MySQL 8.0)
+  db:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: portfolio_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  # 🧪 テスト専用のデータベース (MySQL 8.0)
+  db_test:
+    image: mysql:8.0
+    restart: always
+    ports:
+      - '3307:3306' # ホスト側からは3307ポートでアクセス
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: portfolio_test_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_test_data:/var/lib/mysql
+
+# データの保存場所（ボリューム）の定義
+volumes:
+  mysql_data:
+  mysql_test_data:

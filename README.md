@@ -1,100 +1,54 @@
-# ⚠️本READMEについて
-一旦section5のREADMEをテンプレとして以下は残しておきます。後ほど更新予定。
+---
+name: Root README Setup
+about: プロジェクトのルートに配置し、概要、セットアップ、開発・テスト手順、規約を網羅する総合ガイド
+title: 'Setup: ルートREADME.mdの初期バージョン作成'
+labels: 'scope: docs, type: setup'
+assignees: ''
+---
 
-# プロジェクト開発・品質管理（QA）ガイド
+# ポートフォリオ開発プロジェクト (Fullstack Portfolio)
 
-フロントエンド（Next.js）とバックエンド（Express/Prisma）の2軸で構成され、静的解析（ESLint）、自動整形（Prettier）、および単体・結合テスト（Vitest）による厳格な品質管理（QA）を導入。
+本プロジェクトは、Next.js（フロントエンド）とExpress（バックエンド）をサーバー間通信で連携させ、Prisma/MySQLでデータ管理を行う、管理画面付きフルスタック・ポートフォリオアプリケーションです。
 
 ---
 
-## 🛠️ テスト・検証コマンド
+## 概要
 
-各ツールは、ローカル環境で直接実行するか、Dockerコンテナ内で実行するかによってコマンドが異なります。環境に合わせて使い分けてください。
-
-### 🟩 フロントエンド (`front` フォルダ)
-
-| 目的 | ローカル（直叩き） | Dockerコンテナ経由 |
-| :--- | :--- | :--- |
-| **単体テスト起動 (Watch)** | `npm run test` | `docker compose exec front npm run test` |
-| **カバレッジ（網羅率）測定** | `npm run test:coverage` | `docker compose exec front npm run test:coverage` |
-| **構文チェック (Lint)** | `npm run lint` | `docker compose exec front npm run lint` |
-| **コード自動整形 (Format)** | `npm run format` | `docker compose exec front npm run format` |
-
-### 🟦 バックエンド (`api` フォルダ)
-
-| 目的 | ローカル（直叩き） | Dockerコンテナ経由 |
-| :--- | :--- | :--- |
-| **単体テスト起動 (Watch)** | `npm run test` | `docker compose exec api npm run test` |
-| **テスト用DBの同期** | `npm run db:push:test` | `docker compose exec api npm run db:push:test` |
-| **結合・統合テスト実行** | `npm run test:integration` | `docker compose exec api npm run test:integration` |
-| **カバレッジ（網羅率）測定** | `npm run test:coverage` | `docker compose exec api npm run test:coverage` |
-| **構文チェック (Lint)** | `npm run lint` | `docker compose exec api npm run lint` |
-| **コード自動整形 (Format)** | `npm run format` | `docker compose exec api npm run format` |
-
-> 💡 **QA視点のTips: カバレッジの視覚化**
-> `test:coverage` を実行すると、各フォルダ内に `coverage/index.html` が生成されます。これをブラウザで開くと、コードのどの行がテスト未通過かをビジュアルで確認できる。
+開発・運用において「コード品質の自動統一」と「セマンティックな設計」を重視し、堅牢かつ運用のしやすいポートフォリオ基盤を目指します。
+ルート配下の `docs/` ディレクトリに格納された設計書（`overview.md`, `api.md`, `db.md`, `rules.md`, `test.md`, `screens.md`）を唯一の信頼できるソース（真実のソース）とし、コードの成長とともに段階的にドキュメントをアップデートしていく方針（Docs as Code）を採用しています。
 
 ---
 
-## 📋 主要パッケージ・環境構成
+## MVP (Minimum Viable Product)
 
-### 1. 静的解析・コード成形（規約の統一）
-*   **ESLint / TypeScript-ESLint**: コードの潜在的なバグを自動検知。
-*   **eslint-config-airbnb-base** (API側): 業界で最も厳格とされるAirbnbのコード規約をベースに採用。
-*   **Prettier**: インデント、クォーテーションなどの見た目を自動統一。
-*   **eslint-config-prettier**: ESLintとPrettierのルール衝突を完全に回避。
+「最小限の労力でアイデアを検証する」という原則に基づき、初回のゴールを以下に限定します。
 
-### 2. テスト・品質保証（QAの3階層）
-*   **Vitest (v4.1.6)**: フロント/バック共通の高レスポンスな単体テスト環境。
-*   **@vitest/coverage-v8**: C0/C1カバレッジ（網羅率）の自動測定。
-*   **@testing-library/react & jsdom**: Reactコンポーネントの挙動・DOMテスト。
-*   **Supertest** (API側): HTTPリクエスト/レスポンスのモックテスト（結合テスト用）。
-*   **Cypress**: ユーザーの操作シナリオをブラウザでエミュレートするE2Eテスト環境。
+* **公開側**: プロフィールおよび実績一覧をデータベースから動的に取得・表示できること。
+* **管理側**: Firebase Authenticationによるログイン後、実績のテキスト情報を登録・更新（CRUD）できること。
+* **品質**: strict TypeScript、Airbnb規約、MDN準拠のセマンティックな命名、基本単体テストの合格。
 
-### 3. コアスタック
-*   **Front**: Next.js (v16.2.4) / React (v19.2.4) / Chakra UI
-*   **API**: Express (v5.2.1) / Prisma (v6.19.3) / TypeScript (v6.0.3)
+---
 
-> 💡 **QA視点のTips: テスト用環境変数のインライン管理について**
-> テスト用の物理ファイル（`.env.test`等）を作成していません。ファイル分割時に発生した「テスト実行時に開発/本番用のポートやDB接続先を誤って呼び出してしまうトラブルが頻発したため、`cross-env` を使用してコマンド実行時のみメモリ上でテスト用環境変数を注入しました。
+## 技術構成
 
-### 📝 【検証実績】本プロジェクトで実際に通したテストファイル一覧
+`package.json` および基本設計に準拠した主要な技術スタックです。
 
-* **🟩 フロントエンド側 (`front`)**
-    ```text
-    front/
-    ├── .env.example ── ※フロント側の環境変数テンプレート
-    ├── .env.local   ── ※ローカル開発環境用の環境変数ファイル
-    ├── cypress/
-    │   ├── e2e/
-    │   │   └── 🧪 record.cy.ts      （E2Eテスト：入力〜保存〜履歴遷移の全画面貫通シナリオ）
-    │   ├── fixtures/
-    │   │   └── 📄 example.json     （E2Eテスト用：テストデータの定義ファイル）
-    │   └── support/
-    │       ├── 🧪 commands.ts       （UI・システム連携層テスト：独自カスタムコマンドの定義）
-    │       └── 🧪 e2e.ts            （E2Eテスト全体：共通のインポートや事前設定ファイルを管理）
-    └── src/
-        ├── components/
-        │   └── features/
-        │       └── record/
-        │           └── 🧪 EntryForm.test.tsx （UI層テスト：画面コンポーネント挙動）
-        └── lib/
-            ├── 🧪 math.test.ts （スモークテスト：基本動作確認）
-            └── api/
-                └── 🧪 transactions.test.ts （ロジック層テスト：データ処理）
-    ```
+* **フロントエンド**: Next.js (App Router) / TypeScript (`strict: true`)
+* **バックエンド**: Express / TypeScript
+* **データベース / ORM**: MySQL / Prisma
+* **認証・認可**: Firebase Authentication (Firebase Admin SDK)
+* **静的解析・整形**: ESLint (Airbnb JavaScript Style Guide) / Prettier
+* **テスト**: Vitest (Unit / API), Cypress (E2E)
+* **インフラ（Advanced）**: AWS (HTTPS環境), Redis（※MVP完成後に導入判断）
 
-* **🟦 バックエンド側 (`api`)**
-    ```text
-    ※api/の誤って2重階層にしてしまいました。後日修正必要箇所。
-    api/
-    └── api/
-        ├── ⚙️ .env.test ── ※【不使用】ポート誤呼出トラブル防止のため、現在はcross-envによるインライン注入に移行
-        ├── scripts/
-        │   └── 🧪 seed-test-db.ts （テスト用DB初期化・シードデータ投入スクリプト）
-        └── src/
-            └── __tests__/
-                ├── 🧪 integration.smoke.test.ts （基本検証：スモークテスト）
-                ├── 🧪 categories.unit.test.ts   (ロジック層・単体テスト：モックによる正常系/異常系検証)
-                └── 🧪 categories.int.test.ts    （結合テスト：DB連携検証層）
-    ```
+---
+
+## セットアップ
+
+リポジトリをクローンした後、以下の手順で環境構築から起動までを行えます。
+
+### 1. 依存関係のインストール
+各サブディレクトリ（`front`、`api`）にてパッケージをインストールします。
+```bash
+# front と api のそれぞれの配下で実行
+npm install
