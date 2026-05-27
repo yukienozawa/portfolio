@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authMiddleware, AuthRequest } from '../authMiddleware';
 import { Response, NextFunction } from 'express';
 import { auth } from '../../config/firebase';
+import { DecodedIdToken } from 'firebase-admin/auth';
 
 // 🔥 ここがポイント：「本物のFirebase」を見に行かないように身代わり（モック）を作ります
 vi.mock('../../config/firebase', () => ({
@@ -34,7 +35,7 @@ describe('authMiddleware (認可ミドルウェアのテスト)', () => {
     req.headers!.authorization = 'Bearer valid-token-xyz';
     
     // Firebaseマシーンが「このトークンは本物だよ」と mockUser を返すように偽装
-    vi.mocked(auth.verifyIdToken).mockResolvedValue(mockUser as any);
+    vi.mocked(auth.verifyIdToken).mockResolvedValue(mockUser as DecodedIdToken);
 
     await authMiddleware(req as AuthRequest, res as Response, next);
 
