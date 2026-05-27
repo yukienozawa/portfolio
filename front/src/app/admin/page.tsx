@@ -1,3 +1,5 @@
+//管理者ダッシュボードページ
+
 "use client";
 
 import { useState, useEffect } from "react";
