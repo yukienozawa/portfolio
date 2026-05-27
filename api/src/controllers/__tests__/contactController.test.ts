@@ -42,7 +42,7 @@ describe('Contact APIのテスト', () => {
       .post('/api/contact')
       .send(validPayload);
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(res.body.name).toBe('山田太郎');
     expect(res.body.email).toBe('test@example.com');
   });

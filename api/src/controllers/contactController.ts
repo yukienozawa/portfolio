@@ -28,8 +28,8 @@ export const contactController = {
         messageContent,
       });
 
-      // 4. 保存されたオブジェクトとともに 200 OK を返却
-      return res.status(200).json(newInquiry);
+      // 4. 保存されたオブジェクトとともに 201 Created を返却
+      return res.status(201).json(newInquiry);
     } catch (error) {
       console.error('Contact submit error:', error);
       return res.status(500).json({ error: 'Internal Server Error' });
