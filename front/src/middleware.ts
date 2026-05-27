@@ -1,23 +1,43 @@
-//🛡️ 認可等のミドルウェア (Issue #4で作成済)
+//🛡️ 管理画面（/admin）へのアクセスを監視・保護するルーティングミドルウェア
 
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-
+import { NextRequest, NextResponse } from "next/server";
+ 
+// ============================================================
+// ⚠️ 【重要・設計意図】/admin のルーティング保護について
+// ============================================================
+// [セキュリティ要件]
+//   未認証ユーザーが /admin へアクセスした場合、ログイン画面へリダイレクト
+//   させてはならない。リダイレクトは /admin の「存在」を暴露するため。
+//   代わりに NextResponse.rewrite() で 404 画面を描画し、
+//   管理画面の存在自体を完全に隠蔽する。
+//
+// [認証方式]
+//   Firebase が発行するセッションCookie（"session"）を検証する。
+//   サーバーサイド（middleware）でCookieの有無を確認し、
+//   厳密な検証は /admin/page.tsx 側でも行う。
+// ============================================================
+ 
 export function middleware(request: NextRequest) {
-  // 💡 【TODO】Phase 2の後半で、本物のFirebaseログイン状態（セッション）の判定に差し替えます
-  // 現時点では、動作確認できるようにダミーのフラグにしておきます
-  // レビュー確認のため、一時的に false（未認証）に設定
-  const isAuthenticated = false; // 管理画面を確認したい時は true、404隠蔽をテストしたい時は false に切り替える
-
-  // 管理画面（/admin）へのアクセスで、かつ未認証の場合
-  if (request.nextUrl.pathname.startsWith('/admin') && !isAuthenticated) {
-    // ➔ URLはそのまま（/admin のまま）で、中身だけ404ページを表示して存在を隠蔽する！
-    return NextResponse.rewrite(new URL('/404', request.url));
+  const { pathname } = request.nextUrl;
+ 
+  // /admin 配下へのアクセスを監視
+  if (pathname.startsWith("/admin")) {
+    const sessionCookie = request.cookies.get("session");
+ 
+    // 未認証の場合：リダイレクトせず 404 を描画して存在を隠蔽
+    if (!sessionCookie) {
+      const notFoundUrl = request.nextUrl.clone();
+      // ⭕ アンダースコアを付けるのがNext.jsの裏ルール！
+      notFoundUrl.pathname = "/_not-found";
+      //NextResponse.rewrite => URLを変えずに中身だけ404にする
+      return NextResponse.rewrite(notFoundUrl);
+    }
   }
-
+ 
   return NextResponse.next();
 }
-
+ 
 export const config = {
-  matcher: '/admin/:path*',
+  matcher: ["/admin/:path*"],
 };
+ 
