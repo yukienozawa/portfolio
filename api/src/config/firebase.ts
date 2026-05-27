@@ -14,8 +14,10 @@ if (!admin.apps.length) {
     console.log('🔥 Firebase Admin SDK の初期化に成功しました！');
   } catch (error) {
     console.error('❌ Firebase Admin SDK の初期化でエラーが発生しました:', error);
+    throw error; // 👈エラーをここで外に投げて、処理を安全にストップさせる！
   }
 }
 
 // 他のファイル（middlewareなど）で認証チェックをするために、auth機能をエクスポート
+// 正常に初期化できたときだけ、これが安全にエクスポートされるようになる
 export const auth = admin.auth();
