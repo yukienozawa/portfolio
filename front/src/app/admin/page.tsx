@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { getAuth } from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { notFound } from "next/navigation";
 
 // ============================================================
 // 型定義
@@ -54,14 +53,14 @@ export default function AdminDashboardPage() {
     };
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        // 未ログイン時はリダイレクトせず、直接404画面を呼び出して隠蔽！
-        notFound();
-        return;
-      }
-      setIsAuthChecked(true);
-      fetchAchievements();
-    });
+  // 💡 ログインしている（userが存在する）ときだけ、データを取りに行く
+  if (user) {
+    setIsAuthChecked(true);
+    fetchAchievements();
+  }
+  // ◀ ログインしていない（未認証）のときは何も書かなくてOK！
+  // なぜなら、ここに辿り着く前に「middleware.ts」が画面ごと404に書き換えてくれているから。
+});
 
     return () => unsubscribe();
   }, [auth]); // 💡 依存関係には auth のみを指定して完全準拠

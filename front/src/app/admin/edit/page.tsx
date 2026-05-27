@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { notFound } from "next/navigation";
 
 // ============================================================
 // 型定義
@@ -69,16 +68,17 @@ export default function AdminEditPage() {
     };
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        notFound();
-        return;
-      }
-      setIsAuthChecked(true);
+  // 💡 ログインしている（userが存在する）ときだけ、中身の処理を進める
+  if (user) {
+    setIsAuthChecked(true);
 
-      if (editId) {
-        fetchExistingData(editId);
-      }
-    });
+    if (editId) {
+      fetchExistingData(editId);
+    }
+  }
+  // ◀ 未ログインの時は何も書かなくてOK！
+  // 画面が表示される前に middleware.ts が 404画面（存在隠蔽）に変えてくれるためです。
+});
 
     return () => unsubscribe();
     // 依存関係に auth も追加して、ESLintのルールに完全準拠！
