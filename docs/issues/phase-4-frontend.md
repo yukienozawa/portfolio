@@ -26,7 +26,7 @@ Phase 4は、フロントエンド（`front` フォルダ）において、Next.
   * `front/src/app/skills/page.tsx` （スキル一覧：インラインスタイルを併用した動的レベルメーターコンポーネント）
   * `front/src/app/contact/page.tsx` （問い合わせフォーム：`useState` オブジェクト管理と送信 loading 制御）
 
-### 3. 実実装内容
+### 3. 実装内容
 - **Works画面**: ページアクセス時にモックデータ（`MOCK_ACHIEVEMENTS`）を動的にマッピング。将来のBase64画像表示を見据え、Next.jsの画像最適化をバイパスする `unoptimized` 属性を先行実装。
 - **Skills画面**: スキルレベル（1〜5）を親しみやすいメーター形式で視覚化する `SkillBar` コンポーネントを切り出し、スプレッド構文によるスマートなデータ受け渡しを実現。
 - **Contactフォーム**: お名前（`senderName`）、メールアドレス（`senderEmail`）、本文（`messageContent`）の入力を単一のハンドラー（ブラケット記法）で制御。ローカルバリデーション（メール形式正規表現含む）をパスした段階で `/api/contact` へリクエストを送出する連打防止（loading）付き送信ロジックを配備。
