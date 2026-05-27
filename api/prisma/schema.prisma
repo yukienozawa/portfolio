@@ -44,3 +44,13 @@ model Achievement {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// 3. お問い合わせ情報を管理するテーブル
+model Inquiry {
+  id        String   @id @default(uuid()) // 自動で一意のID（UUID）を生成
+  name      String   // お名前
+  email     String   // メールアドレス
+  message   String   @db.Text // 問い合わせ本文（長文対応）
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
