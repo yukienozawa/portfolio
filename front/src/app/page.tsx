@@ -46,7 +46,7 @@ export default function TopPage() {
       <section className="mt-20 text-center">
         <p className="text-sm text-slate-400 mb-4">Tech Stack</p>
         <div className="flex flex-wrap justify-center gap-2">
-          {["React", "Next.js", "TypeScript", "Express", "Prisma", "MySQL", "Tailwind CSS"].map(
+          {["React", "Next.js", "TypeScript", "Chakra UI", "Express", "Prisma", "MySQL", "Tailwind CSS"].map(
             (tech) => (
               <span
                 key={tech}
@@ -58,6 +58,24 @@ export default function TopPage() {
           )}
         </div>
       </section>
+      {/* 🕵️‍♂️ 【秘密の裏口フッター】管理者画面ここに仕込む */}
+      <footer className="mt-32 pb-8 text-center select-none">
+        <p className="text-[10px] tracking-widest text-slate-400">
+          © 2026 Yukie Nozawa. All rights reserved.
+        </p>
+        
+        {/* 仕切り線に挟まれた隠しリンク（薄さはそのままキープ） */}
+        <div className="flex items-center justify-center gap-3 max-w-xs mx-auto mt-4 text-[9px] text-slate-300/30">
+          <div className="h-[1px] w-8 bg-slate-200/30"></div>
+          <Link 
+            href="/secret-login" 
+            className="hover:text-indigo-500/40 transition-colors cursor-default tracking-[0.2em] font-light"
+          >
+            2026 2nd-STAGE
+          </Link>
+          <div className="h-[1px] w-8 bg-slate-200/30"></div>
+        </div>
+      </footer>
     </main>
   );
 }
