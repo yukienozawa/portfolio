@@ -34,8 +34,10 @@ export default function AdminLoginPage() {
       // 💡 通行手形（IDトークン）を取得
       const idToken = await user.getIdToken();
 
+      // 💡 現在のURLが「localhost」のときは secure を false に、本番（HTTPS）のときは true に自動で切り替えます
+      const isSecure = window.location.hostname !== 'localhost';
       // 💡 ミドルウェアがチェックしている「session」という名前でCookieに保存します（有効期限1日）
-      Cookies.set('session', idToken, { expires: 1, secure: true, sameSite: 'strict' });
+      Cookies.set('session', idToken, { expires: 1, secure: isSecure, sameSite: 'strict' });
 
       // ✨ 通行手形を持った状態で、満を持して管理画面へ突入！
       router.push('/admin');
