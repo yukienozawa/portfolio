@@ -1,15 +1,15 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-// 👇 Firebaseの画面からコピーした「firebaseConfig」をここに上書き
+// 👇 Firebaseの設定値
 const firebaseConfig = {
-  apiKey: "AIzaSyDqDN8zvS6QSzhK5N_FNhKz2XWaf3fdz2o",
-  authDomain: "yukie-portfolio.firebaseapp.com",
-  projectId: "yukie-portfolio",
-  storageBucket: "yukie-portfolio.firebasestorage.app",
-  messagingSenderId: "92926356323",
-  appId: "1:92926356323:web:14b9a2c2ae79b1eb440156",
-  measurementId: "G-3EWWFX4CC3"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 

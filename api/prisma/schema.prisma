@@ -29,7 +29,7 @@ model Achievement {
   id          String   @id @default(uuid()) // 自動で一意のID（UUID）を生成します
   title       String   // 実績のタイトル（例:「家計簿アプリ開発」や「前職での業務効率化プロジェクト」など）
   description String?  @db.Text // 詳細テキスト（長文対応）
-  imageUrl    String?  // 成果物や活動の画像URL
+  imageUrl    String? @db.LongText  // 成果物や活動の画像URL
   
   // 🚀 アピール・カテゴリ拡張用
   category    String   @default("WEB_APP") // 実績の種類（"WEB_APP", "CAREER", "CREATIVE" など）
