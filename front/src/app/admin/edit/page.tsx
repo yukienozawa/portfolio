@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getAuth } from "firebase/auth";
+import "@/lib/firebase";
+import { getAuth } from "firebase/auth";// 💡1. ここでFirebaseの認証機能をインポートして…
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -42,25 +43,34 @@ export default function AdminEditPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("id");
-  const auth = getAuth();
+  const auth = getAuth();// 💡2. ここで認証インスタンスを取得
 
   // ============================================================
   // 認証チェック ＆ 既存データ取得
   // ============================================================
   useEffect(() => {
-    // 関数を useEffect の中に引っ越しさせてローカル化！
     const fetchExistingData = async (id: string) => {
       try {
         const idToken = await auth.currentUser?.getIdToken();
-        const response = await fetch(`/api/achievements/${id}`, {
+        
+        // 🛠️ 修正1：URLの頭に `/admin` を追加し、管理者用APIへ正しくアクセスさせます！
+        const response = await fetch(`/api/admin/achievements/${id}`, {
           headers: { Authorization: `Bearer ${idToken}` },
         });
 
         if (!response.ok) throw new Error("データの取得に失敗しました。");
 
-        const data: EditForm = await response.json();
-        setForm(data);
-        if (data.imageData) setPreviewUrl(data.imageData);
+        const data = await response.json();
+
+      // ✨ フロントのフォームの形（achievementTitle、imageData）に綺麗に詰め替える
+      setForm({
+        achievementTitle: data.title || "",
+        description: data.description || "",
+        imageData: data.imageUrl || "",
+      });
+
+      if (data.imageUrl) setPreviewUrl(data.imageUrl);
+
       } catch (error: unknown) {
         console.error("既存データ取得エラー:", error);
         setErrorMessage("データの取得に失敗しました。");
@@ -68,20 +78,16 @@ export default function AdminEditPage() {
     };
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
-  // 💡 ログインしている（userが存在する）ときだけ、中身の処理を進める
-  if (user) {
-    setIsAuthChecked(true);
+      if (user) {
+        setIsAuthChecked(true);
 
-    if (editId) {
-      fetchExistingData(editId);
-    }
-  }
-  // ◀ 未ログインの時は何も書かなくてOK！
-  // 画面が表示される前に middleware.ts が 404画面（存在隠蔽）に変えてくれるためです。
-});
+        if (editId) {
+          fetchExistingData(editId);
+        }
+      }
+    });
 
     return () => unsubscribe();
-    // 依存関係に auth も追加して、ESLintのルールに完全準拠！
   }, [editId, auth]);
 
   // ============================================================
@@ -100,6 +106,13 @@ export default function AdminEditPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // 💡 2MB（2 * 1024 * 1024 バイト）を超えていたら処理を中断してアラートを出す
+    const maxSize = 2 * 1024 * 1024; 
+    if (file.size > maxSize) {
+      alert("画像サイズが大きすぎます！2MB以下の画像を選択してください。");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -136,7 +149,9 @@ export default function AdminEditPage() {
 
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const url = editId ? `/api/achievements/${editId}` : "/api/achievements";
+      
+      // 🛠️ 修正2：登録(POST)と更新(PUT)の宛先URLにもしっかりと `/admin` を付与します！
+      const url = editId ? `/api/admin/achievements/${editId}` : "/api/admin/achievements";
       const method = editId ? "PUT" : "POST";
 
       const response = await fetch(url, {

@@ -32,4 +32,26 @@ export const achievementService = {
       },
     });
   },
+
+  /**
+   * 既存の実績をデータベース（MySQL）に上書き保存する
+   * any禁止ルールをクリアするため、引数と戻り値（Promise<unknown>）の型を厳格に定義しています。
+   */
+  async updateAchievement(
+    id: string,
+    data: {
+      achievementTitle: string;
+      description: string;
+      imageData: string;
+    }
+  ): Promise<unknown> {
+    return await prisma.achievement.update({
+      where: { id },
+      data: {
+        title: data.achievementTitle,
+        description: data.description,
+        imageUrl: data.imageData,
+      },
+    });
+  },
 };

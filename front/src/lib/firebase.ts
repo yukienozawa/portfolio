@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
-// 👇 Firebaseの画面からコピーした「firebaseConfig」をここに上書き
+// 👇 Firebaseの画面からコピーした「firebaseConfig」をここに上書きしてください
 const firebaseConfig = {
   apiKey: "AIzaSyDqDN8zvS6QSzhK5N_FNhKz2XWaf3fdz2o",
   authDomain: "yukie-portfolio.firebaseapp.com",
