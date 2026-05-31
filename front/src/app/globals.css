@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   カスタムスタイル（将来的なリファクタリング用）
+　　必要になったらコメントアウトを外して使用してみる（今は不要）
+   ============================================================ */
+
+/* 1. コンポーネント共通スタイル （見た目の設定）
+   @layer components {
+     .btn-primary {
+       @apply px-6 py-3 bg-[#3c3fbc] text-white font-bold rounded-xl hover:bg-[#2e319c] transition-all shadow-sm text-sm tracking-wider;
+     }
+   }
+*/
+
+/* 2. フォントの使い分け設定
+   @layer utilities {
+     .text-heading {
+       @apply font-serif tracking-tight text-slate-900;
+     }
+     .text-body {
+       @apply font-sans tracking-wide leading-relaxed text-slate-600;
+     }
+   }
+*/
