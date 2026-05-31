@@ -6,3 +6,51 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+// 1. ユーザー情報を管理するテーブル
+model User {
+  id        String   @id // Firebase Authenticationのuidをそのまま格納します
+  email     String   @unique
+  name      String?
+  role      String   @default("USER") // "USER" または "ADMIN" (管理画面の隠蔽判定に使用)
+  
+  // 🚀 未来の拡張用（使わなくても空っぽでOKな器たち）
+  avatarUrl   String?  // プロフィール画像（アイコン）のURL
+  bio         String?  @db.Text // 自己紹介文・キャッチコピー（長文対応）
+  githubUrl   String?  // あなた自身のGitHubリンク
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+// 2. 実績（ポートフォリオや成果物）を管理するテーブル（最終形態版）
+model Achievement {
+  id          String   @id @default(uuid()) // 自動で一意のID（UUID）を生成します
+  title       String   // 実績のタイトル（例:「家計簿アプリ開発」や「前職での業務効率化プロジェクト」など）
+  description String?  @db.Text // 詳細テキスト（長文対応）
+  imageUrl    String? @db.LongText  // 成果物や活動の画像URL
+  
+  // 🚀 アピール・カテゴリ拡張用
+  category    String   @default("WEB_APP") // 実績の種類（"WEB_APP", "CAREER", "CREATIVE" など）
+  effortPoint String?  @db.Text            // 工夫した点・学んだこと（アピールポイント！）
+
+  // 🔗 未来の拡張用（使わなくても空っぽでOKな器たち）
+  siteUrl     String?  // 実際の成果物URL
+  githubUrl   String?  // GitHubのリポジトリURL
+  techStack   String?  // 使用技術（例: "React, Next.js"）
+  isPublished Boolean  @default(false) // 公開フラグ（最初は下書き保存されるので安全！）
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// 3. お問い合わせ情報を管理するテーブル
+model Inquiry {
+  id        String   @id @default(uuid()) // 自動で一意のID（UUID）を生成
+  name      String   // お名前
+  email     String   // メールアドレス
+  message   String   @db.Text // 問い合わせ本文（長文対応）
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
