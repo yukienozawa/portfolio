@@ -3,6 +3,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 // ============================================================
 // 型定義（PrismaのInquiryモデルのフィールド名に完全準拠させます）
@@ -168,6 +169,16 @@ export default function ContactPage() {
           {status === "loading" ? "送信中..." : "送信する"}
         </button>
       </form>
+
+      {/* トップページへ戻るリンク */}
+      <div className="mt-10 text-center">
+        <Link
+          href="/"
+          className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-100 transition-colors text-sm inline-block"
+        >
+          トップページへ戻る
+        </Link>
+      </div>
     </main>
   );
 }
