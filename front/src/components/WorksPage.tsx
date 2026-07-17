@@ -49,10 +49,10 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
         </div>
 
         <div className="p-6 md:p-8 lg:p-10 flex-1 flex flex-col justify-center space-y-4">
-          <h2 className="font-serif text-xl md:text-2xl lg:text-3xl font-black text-slate-800 border-l-4 border-indigo-500 pl-3 leading-snug">
+          <h2 className="font-sans text-xl md:text-2xl lg:text-3xl font-black text-slate-800 border-l-4 border-indigo-500 pl-3 leading-snug">
             {achievement.title}
           </h2>
-          <p className="font-serif text-sm md:text-base text-slate-600 leading-relaxed whitespace-pre-wrap">
+          <p className="font-sans text-xs md:text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
             {achievement.description}
           </p>
         </div>
@@ -76,7 +76,7 @@ export default function WorksPage() {
       {/* 固定ヘッダー（スクロールしても常に表示） */}
       <header className="flex-shrink-0 text-center pt-12 pb-8 px-4">
         <h1 className="font-serif text-4xl md:text-5xl font-bold text-slate-800 mb-4">WORKS</h1>
-        <p className="font-serif text-slate-600 text-lg">これまでに作ったプロダクトたち</p>
+        <p className="font-sans text-slate-600 text-lg">これまでに作ったプロダクトたち</p>
         <div className="w-16 h-1 bg-indigo-600 mx-auto mt-4" />
       </header>
 
