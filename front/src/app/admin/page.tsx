@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
       } catch (error: unknown) {
         console.error("データ取得エラー:", error);
         setErrorMessage("データの取得に失敗しました。");
-      } bits: {
+      } finally {
         setIsLoading(false);
       }
     };
