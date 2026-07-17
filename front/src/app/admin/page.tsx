@@ -330,17 +330,17 @@ export default function AdminDashboardPage() {
             </div>
 
             <div>
-              <label htmlFor="avatarUrl" className="block text-sm font-semibold text-slate-700 mb-2">プロフィール画像 URL (GitHub等の画像URL)</label>
+              <label htmlFor="avatarUrl" className="block text-sm font-semibold text-slate-700 mb-2">プロフィール画像 URL</label>
               <input
                 type="text"
                 id="avatarUrl"
                 name="avatarUrl"
                 value={profile.avatarUrl || ""}
                 onChange={handleProfileChange}
-                placeholder="https://github.com/your-username.png"
+                placeholder="/images/profile.jpg"
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:border-indigo-500 font-mono"
               />
-              <p className="text-xs text-slate-400 mt-1">※GitHubの「https://github.com/ユーザー名.png」を入れると自動でアイコン写真になります。</p>
+              <p className="text-xs text-slate-400 mt-1">※プロジェクト内の画像パス（例: /images/profile.jpg）または外部の画像URLを入力してください。</p>
             </div>
 
             <div>
