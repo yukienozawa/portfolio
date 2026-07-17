@@ -66,7 +66,7 @@ export default function ContactPage() {
 
     try {
       // ➔ 開通済みのプロキシ（/api）経由で、Expressの /api/inquiries に一本化して叩きます
-      const response = await fetch("/api/inquiries", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form), // { name, email, message } がそのままバックエンドへ届きます
