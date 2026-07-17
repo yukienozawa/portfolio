@@ -14,14 +14,11 @@ import { useProfile } from "@/hooks/useProfile";
 // 定数データ（追加・変更はここだけでOK）
 // ============================================================
  
-// トップページに直書きする説明文（DBから取得しない）
-const BIO_TEXT = "現在、フルスタックブートキャンプにて、Next.js、TypeScript、ExpressなどのWeb技術を猛勉強中です。";
- 
 const TECH_STACK = [
-  "React", "Next.js", "TypeScript", "Chakra UI",
-  "Express", "Prisma", "MySQL", "Tailwind CSS",
+  "JavaScript", "TypeScript", "React", "Next.js",
+  "Node.js", "Express.js", "Prisma", "Tailwind CSS",
+  "MySQL", "PostgreSQL", "Docker",
 ];
- 
 // ============================================================
 // 子コンポーネント（UIパーツ）
 // ============================================================
@@ -79,9 +76,11 @@ export default function TopPage() {
           Hi, I{"'"}m <span className="text-[#3c3fbc] font-black">{profile.name}</span>
         </h2>
  
-        {/* 3. 説明文（直書き・セリフ体・グレー） */}
+        {/* 3. 説明文（直書き・セリフ体・グレー）※トップページに直書きする（DBから取得しない） */}
         <p className="font-serif text-sm md:text-base text-slate-500 leading-relaxed mb-8 max-w-2xl tracking-wide font-medium px-2">
-          {BIO_TEXT}
+          &quot;あったらいいな&quot;を形にしたい
+          <br />
+          技術力とチームの力を両方大切にするエンジニアを目指しています
         </p>
  
         {/* 4. ナビゲーションボタン */}
