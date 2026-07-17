@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 // ============================================================
 interface Achievement {
   id: string;
-  Title: string;
+  title: string;
   description: string;
 }
 
@@ -266,7 +266,7 @@ export default function AdminDashboardPage() {
                   {achievements.map((achievement) => (
                     <tr key={achievement.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 font-semibold text-slate-800 whitespace-nowrap">
-                        {achievement.Title}
+                        {achievement.title}
                       </td>
                       <td className="px-6 py-4 max-w-md truncate">{achievement.description}</td>
                       <td className="px-6 py-4 text-right whitespace-nowrap">

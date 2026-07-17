@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  devIndicators: false,
+
   allowedDevOrigins: [process.env.NEXT_PUBLIC_ALLOWED_DEV_ORIGIN || 'localhost:3000'],
 
   // 👥 外部のサイト（GitHub）の画像を <Image /> タグで表示するための安全許可設定

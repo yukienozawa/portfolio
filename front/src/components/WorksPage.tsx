@@ -39,14 +39,16 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
             スマホ：横幅いっぱい・高さ56（224px）
             タブレット以上：幅1/3固定・高さ自動（テキストに合わせて伸びる） */}
         <div className="w-full md:w-1/3 flex-shrink-0">
-          <div className="relative w-full h-56 md:h-full min-h-[280px] bg-slate-50 flex items-center justify-center text-slate-400 overflow-hidden">
+          {/* 💡 bg-white に変更してダッシュボードの背景となじませ、p-2 で外枠との間に少し余白を作るとさらに綺麗に収まります */}
+          <div className="relative w-full h-56 md:h-full min-h-[280px] bg-white flex items-center justify-center text-slate-400 overflow-hidden p-2">
             {achievement.imageUrl ? (
               // 画像URLがある場合：Next.js Image で最適化表示
               <Image
                 src={achievement.imageUrl}
                 alt={achievement.title}
                 fill
-                className="object-cover"
+                // 💡 object-cover から object-contain object-top に変更しました！
+                className="object-contain object-top p-2"
                 unoptimized
               />
             ) : (

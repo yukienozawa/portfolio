@@ -64,7 +64,7 @@ export default function AdminEditPage() {
 
       // ✨ フロントのフォームの形（achievementTitle、imageData）に綺麗に詰め替える
       setForm({
-        achievementTitle: data.title || "",
+        achievementTitle: data.title || data.Title || "",
         description: data.description || "",
         imageData: data.imageUrl || "",
       });
