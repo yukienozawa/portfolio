@@ -9,8 +9,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useWorks } from "@/hooks/useWorks";
+import PageNav from "@/components/PageNav";
 
 // ============================================================
 // 型定義
@@ -25,8 +25,6 @@ interface Achievement {
 
 // ============================================================
 // 子コンポーネント（UIパーツ）
-// ✅ コンポーネントは function 宣言で定義する
-//    コンポーネント内部の処理は const アロー関数で書く
 // ============================================================
 
 /** 実績カード：画像・タイトル・説明文を横並びで表示 */
@@ -35,41 +33,27 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
     <li className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
       <article className="flex flex-col md:flex-row">
 
-        {/* 左側：画像エリア
-            スマホ：横幅いっぱい・高さ56（224px）
-            タブレット以上：幅1/3固定・高さ自動（テキストに合わせて伸びる） */}
         <div className="w-full md:w-1/3 flex-shrink-0">
-          {/* 💡 bg-white に変更してダッシュボードの背景となじませ、p-2 で外枠との間に少し余白を作るとさらに綺麗に収まります */}
           <div className="relative w-full h-56 md:h-full min-h-[280px] bg-white flex items-center justify-center text-slate-400 overflow-hidden p-2">
             {achievement.imageUrl ? (
-              // 画像URLがある場合：Next.js Image で最適化表示
               <Image
                 src={achievement.imageUrl}
                 alt={achievement.title}
                 fill
-                // 💡 object-cover から object-contain object-top に変更しました！
                 className="object-contain object-top p-2"
                 unoptimized
               />
             ) : (
-              // 画像URLがない場合：フォルダアイコンを表示
               <span className="text-4xl">📁</span>
             )}
           </div>
         </div>
 
-        {/* 右側：テキスト領域（文章量に合わせて自然に伸びる） */}
         <div className="p-6 md:p-8 lg:p-10 flex-1 flex flex-col justify-center space-y-4">
-
-          {/* タイトル：セリフ体・インディゴの左ボーダーで強調
-              スマホ：xl、タブレット：2xl、PC：3xl とスケール */}
-          <h2 className="font-serif text-xl md:text-2xl lg:text-3xl font-black text-slate-800 border-l-4 border-indigo-500 pl-3 leading-snug">
+          <h2 className="font-sans text-xl md:text-2xl lg:text-3xl font-black text-slate-800 border-l-4 border-indigo-500 pl-3 leading-snug">
             {achievement.title}
           </h2>
-
-          {/* 説明文：セリフ体・グレー
-              スマホ：sm、タブレット以上：base とスケール */}
-          <p className="font-serif text-sm md:text-base text-slate-600 leading-relaxed whitespace-pre-wrap">
+          <p className="font-sans text-xs md:text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
             {achievement.description}
           </p>
         </div>
@@ -81,66 +65,63 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
 // ============================================================
 // メインコンポーネント
 // 責務：useWorks からデータを受け取り、子コンポーネントに配るだけ
+// レイアウト：ヘッダーとフッターを固定し、実績一覧部分のみスクロールする
 // ============================================================
 
 export default function WorksPage() {
-  // useWorks フックからデータ・ローディング状態・エラー状態を受け取る
-  // このコンポーネント自身は fetch も useState も書かない
   const { achievements, isLoading, isError } = useWorks();
 
   return (
-    // max-w-5xl：PC大画面でもカードが広く使えるよう幅を拡張
-    <main className="max-w-5xl mx-auto px-4 py-12">
+    <div className="h-screen flex flex-col bg-slate-50">
 
-      {/* ページヘッダー */}
-      <header className="text-center mb-16">
-        <h1 className="font-serif text-4xl md:text-5xl font-bold text-slate-800 mb-4">WORKS</h1>
-        <p className="font-serif text-slate-600 text-lg">これまでに作ったプロダクトたち</p>
-        <div className="w-16 h-1 bg-indigo-600 mx-auto mt-4" />
+      {/* 固定ヘッダー（スクロールしても常に表示） */}
+      <header className="flex-shrink-0 px-4 pt-6 pb-8 max-w-5xl mx-auto w-full">
+        <PageNav />
+        <div className="mt-2">
+          <h1 className="font-display text-6xl md:text-8xl font-bold text-slate-800 uppercase tracking-tight leading-none">
+            Works
+          </h1>
+          <p className="font-sans text-slate-500 text-lg font-medium tracking-wide mt-3 pl-2">
+            これまでに作ったプロダクトを紹介します<br />
+          </p>
+        </div>
       </header>
 
-      {/* ローディング中 */}
-      {isLoading && (
-        <div className="text-center text-slate-400 text-sm py-20">
-          実績データを読み込み中...
+      {/* 実績一覧（ここだけがスクロール対象） */}
+      <main className="flex-1 overflow-y-auto px-4">
+        <div className="max-w-5xl mx-auto">
+
+          {isLoading && (
+            <div className="text-center text-slate-400 text-sm py-20">
+              実績データを読み込み中...
+            </div>
+          )}
+
+          {isError && (
+            <div className="text-center text-red-500 text-sm py-20">
+              ⚠️ データの取得中にエラーが発生しました。バックエンドサーバーが起動しているか確認してください。
+            </div>
+          )}
+
+          {!isLoading && !isError && achievements.length === 0 && (
+            <div className="text-center text-slate-400 text-sm py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
+              現在、公開できる実績データはありません。<br />
+              <span className="text-xs text-indigo-500 block mt-2">管理画面から新しく追加してみてください！</span>
+            </div>
+          )}
+
+          {!isLoading && !isError && achievements.length > 0 && (
+            <section aria-label="制作実績一覧">
+              <ul className="grid grid-cols-1 gap-10 p-0 list-none pb-8">
+                {achievements.map((achievement) => (
+                  <AchievementCard key={achievement.id} achievement={achievement} />
+                ))}
+              </ul>
+            </section>
+          )}
+
         </div>
-      )}
-
-      {/* エラー時 */}
-      {isError && (
-        <div className="text-center text-red-500 text-sm py-20">
-          ⚠️ データの取得中にエラーが発生しました。バックエンドサーバーが起動しているか確認してください。
-        </div>
-      )}
-
-      {/* データなし */}
-      {!isLoading && !isError && achievements.length === 0 && (
-        <div className="text-center text-slate-400 text-sm py-20 bg-white rounded-2xl border border-slate-100 shadow-sm">
-          現在、公開できる実績データはありません。<br />
-          <span className="text-xs text-indigo-500 block mt-2">管理画面から新しく追加してみてください！</span>
-        </div>
-      )}
-
-      {/* 実績一覧（カードを縦に1列・gap-10で余裕のある間隔） */}
-      {!isLoading && !isError && achievements.length > 0 && (
-        <section aria-label="制作実績一覧">
-          <ul className="grid grid-cols-1 gap-10 p-0 list-none">
-            {achievements.map((achievement) => (
-              <AchievementCard key={achievement.id} achievement={achievement} />
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* トップへ戻るボタン */}
-      <div className="mt-16 text-center">
-        <Link
-          href="/"
-          className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-100 transition-colors text-sm inline-block"
-        >
-          トップページへ戻る
-        </Link>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
