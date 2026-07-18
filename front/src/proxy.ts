@@ -1,7 +1,7 @@
-//🛡️ 管理画面（/admin）へのアクセスを監視・保護するルーティングミドルウェア
+//🛡️ 管理画面（/admin）へのアクセスを監視・保護するルーティングプロキシ
 
 import { NextRequest, NextResponse } from "next/server";
- 
+
 // ============================================================
 // ⚠️ 【重要・設計意図】/admin のルーティング保護について
 // ============================================================
@@ -13,17 +13,17 @@ import { NextRequest, NextResponse } from "next/server";
 //
 // [認証方式]
 //   Firebase が発行するセッションCookie（"session"）を検証する。
-//   サーバーサイド（middleware）でCookieの有無を確認し、
+//   サーバーサイド（proxy）でCookieの有無を確認し、
 //   厳密な検証は /admin/page.tsx 側でも行う。
 // ============================================================
- 
-export function middleware(request: NextRequest) {
+
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
- 
+
   // /admin 配下へのアクセスを監視
   if (pathname.startsWith("/admin")) {
     const sessionCookie = request.cookies.get("session");
- 
+
     // 未認証の場合：リダイレクトせず 404 を描画して存在を隠蔽
     if (!sessionCookie) {
       const notFoundUrl = request.nextUrl.clone();
@@ -33,11 +33,10 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(notFoundUrl);
     }
   }
- 
+
   return NextResponse.next();
 }
- 
+
 export const config = {
   matcher: ["/admin/:path*"],
 };
- 
