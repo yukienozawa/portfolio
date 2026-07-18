@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import "@/lib/firebase";
 import { getAuth } from "firebase/auth";// 💡1. ここでFirebaseの認証機能をインポートして…
 import Image from "next/image";
@@ -29,10 +29,11 @@ const INITIAL_FORM: EditForm = {
 };
 
 // ============================================================
-// メインコンポーネント
+// フォーム本体コンポーネント
+// useSearchParams を使用するため、呼び出し元で Suspense に包む必要がある
 // ============================================================
 
-export default function AdminEditPage() {
+function AdminEditForm() {
   const [form, setForm] = useState<EditForm>(INITIAL_FORM);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -302,5 +303,24 @@ export default function AdminEditPage() {
         </div>
       </form>
     </main>
+  );
+}
+
+// ============================================================
+// ページ本体（Suspense境界でラップ）
+// useSearchParams はクライアントサイドでのみ値が確定するため、
+// Next.jsのビルド要件によりSuspenseでの囲みが必須
+// ============================================================
+export default function AdminEditPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-slate-400">
+          読み込み中...
+        </div>
+      }
+    >
+      <AdminEditForm />
+    </Suspense>
   );
 }

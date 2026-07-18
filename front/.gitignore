@@ -13,3 +13,5 @@ out/
 *.log
 .eslintcache
 .DS_Store
+
+*.tsbuildinfo

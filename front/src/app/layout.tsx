@@ -1,10 +1,16 @@
 import "./globals.css";
-import { Space_Grotesk } from "next/font/google";
+import { Space_Grotesk, Zen_Kaku_Gothic_New } from "next/font/google";
 
 const spaceGrotesk = Space_Grotesk({
   weight: ["500", "700"],
   subsets: ["latin"],
   variable: "--font-display",
+});
+
+const zenKakuGothicNew = Zen_Kaku_Gothic_New({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-body",
 });
 
 export const metadata = {
@@ -18,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={spaceGrotesk.variable}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${zenKakuGothicNew.variable}`}>
       <body className="bg-slate-50">
         {children}
       </body>
