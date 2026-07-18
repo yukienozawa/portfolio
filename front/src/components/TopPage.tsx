@@ -53,7 +53,7 @@ export default function TopPage() {
         <PageNav />
 
         {/* 2. プロフィール画像 */}
-        <div className="relative w-full h-[450px] md:h-[520px] mb-8 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-slate-100 flex items-center justify-center">
+        <div className="relative w-full h-[450px] md:h-[520px] mb-8 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-indigo-100 flex items-center justify-center">
           {profile.avatarUrl ? (
             <Image
               src={profile.avatarUrl}
@@ -62,7 +62,6 @@ export default function TopPage() {
               priority
               sizes="(max-w-5xl) 100vw, 1024px"
               className="object-cover object-[center_60%]"
-              unoptimized
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-5xl font-bold select-none">

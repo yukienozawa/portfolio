@@ -4,11 +4,6 @@ const nextConfig = {
 
   allowedDevOrigins: [process.env.NEXT_PUBLIC_ALLOWED_DEV_ORIGIN || 'localhost:3000'],
 
-  // 👥 外部のサイト（GitHub）の画像を <Image /> タグで表示するための安全許可設定
-  images: {
-    domains: ['github.com'],
-  },
-
   // 🔌 3000番に来た通信を、3001番のExpressに丸投げする中継設定
   async rewrites() {
     return [

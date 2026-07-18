@@ -13,10 +13,10 @@ import PageNav from "@/components/PageNav";
 // ============================================================
 // ⚠️ 重要：プロフィール画面の管理方針について
 // ============================================================
-// 【1】「拠点」「所属」「ライフスタイルブランド」「趣味・ライフスタイル」について
+// 【1】「拠点」「経歴タイムライン」「趣味・ライフスタイル」について
 //    これらは頻繁に変更されない固定情報であるため、管理画面（/admin）のフォーム化はあえて行わず、
 //    開発スピードとDB設計のシンプルさを優先して、本ファイル内の「定数データ（以下）」で直接管理しています。
-//    もし拠点の変更や、趣味の追加・文言修正を行いたい場合は、本ファイルの定数配列（PROFILE_ITEMS / HOBBY_ITEMS）
+//    もし拠点の変更や、経歴・趣味の追加・文言修正を行いたい場合は、本ファイルの定数配列（PROFILE_ITEMS / HISTORY_ITEMS / HOBBY_ITEMS）
 //    のテキストを直接書き換えるだけで、一瞬で安全に反映できます。
 //
 // 【2】「名前」「アイコン画像」「自己紹介文」について
@@ -32,6 +32,11 @@ interface ProfileItem {
   value: string;
 }
 
+interface HistoryItem {
+  date: string;
+  event: string;
+}
+
 interface HobbyItem {
   icon: "diy" | "dog" | "spicy" | "code";
   title: string;
@@ -45,8 +50,14 @@ interface HobbyItem {
 // 基本情報リスト（追加・変更はここだけでOK）
 const PROFILE_ITEMS: ProfileItem[] = [
   { label: "拠点", value: "新潟県上越市" },
-  { label: "現在の所属", value: "Ms.Engineer フルスタックエンジニアリングコース" },
-  { label: "ライフスタイルブランド", value: "NatuLife" },
+];
+
+// 経歴タイムライン（追加・変更はここだけでOK）
+const HISTORY_ITEMS: HistoryItem[] = [
+  { date: "2026年1月", event: "Ms.Engineer受講開始" },
+  { date: "2026年2月", event: "24年務めた会社を退職" },
+  { date: "2026年4月", event: "コーディングブートキャンプ受講開始" },
+  { date: "2026年7月", event: "コーディングブートキャンプ修了" },
 ];
 
 // 趣味・ライフスタイルリスト（追加・変更はここだけでOK）
@@ -69,7 +80,7 @@ const HOBBY_ITEMS: HobbyItem[] = [
   {
     icon: "code",
     title: "AIドリブン開発",
-    description: "CursorなどのAIエディタを活用し、効率的でスピーディーなモダンWeb開発の手法を模索しています。",
+    description: "AIにどう開発させるのか、効率的でスピーディーなモダンWeb開発の手法を模索しています。",
   },
 ];
 
@@ -82,7 +93,7 @@ const HOBBY_ITEMS: HobbyItem[] = [
 /** セクション見出し（インジケーター付き） */
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="font-display text-2xl font-bold text-slate-800 mb-6 flex items-center border-b border-slate-100 pb-3 uppercase tracking-[0.3em]">
+    <h3 className="font-display text-2xl font-bold text-slate-800 mb-6 flex items-center border-b border-slate-100 pb-3 uppercase tracking-[0.15em]">
       <span className="w-1 h-6 bg-indigo-600 rounded-full mr-3" />
       {children}
     </h3>
@@ -113,14 +124,12 @@ function HobbyIcon({ type }: { type: HobbyItem["icon"] }) {
 
   switch (type) {
     case "diy":
-      // 金づちアイコン
       return (
         <svg {...commonProps}>
           <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
         </svg>
       );
     case "dog":
-      // 肉球アイコン
       return (
         <svg {...commonProps}>
           <circle cx="11" cy="4" r="2" />
@@ -130,14 +139,12 @@ function HobbyIcon({ type }: { type: HobbyItem["icon"] }) {
         </svg>
       );
     case "spicy":
-      // 唐辛子アイコン（炎で代用、辛さのイメージ）
       return (
         <svg {...commonProps}>
           <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
         </svg>
       );
     case "code":
-      // コードアイコン
       return (
         <svg {...commonProps}>
           <polyline points="16 18 22 12 16 6" />
@@ -170,14 +177,18 @@ function ProfileCard({ name, avatarUrl }: { name: string; avatarUrl: string }) {
           )}
         </div>
         <h2 className="font-display text-3xl font-bold text-[#3c3fbc] uppercase tracking-[0.3em]">{name}</h2>
-        <p className="text-sm text-slate-500 font-medium tracking-widest uppercase mt-2">
-          Full-Stack Developer Student
+                <p className="font-body text-sm text-slate-600 font-medium tracking-widest uppercase mt-2">
+          Full-Stack Developer
+        </p>
+        <p className="font-body text-xs text-slate-600 font-medium tracking-widest uppercase mt-1">
+          User-Centered, Always.
         </p>
       </div>
 
       <hr className="border-slate-100 my-6" />
 
-      <dl className="space-y-4 text-sm text-slate-600">
+      {/* 拠点 */}
+      <dl className="space-y-4 text-sm text-slate-600 font-body">
         {PROFILE_ITEMS.map(({ label, value }) => (
           <div key={label}>
             <dt className="font-semibold text-slate-800">{label}</dt>
@@ -185,6 +196,21 @@ function ProfileCard({ name, avatarUrl }: { name: string; avatarUrl: string }) {
           </div>
         ))}
       </dl>
+
+      {/* HISTORY：経歴タイムライン */}
+      <div className="mt-6">
+        <h3 className="font-display text-sm font-bold text-slate-800 uppercase tracking-[0.15em] mb-3">
+          History
+        </h3>
+        <ul className="space-y-3 text-sm text-slate-600 font-body border-l-2 border-slate-100 pl-4">
+          {HISTORY_ITEMS.map(({ date, event }) => (
+            <li key={date}>
+              <span className="block text-xs text-indigo-600 font-semibold">{date}</span>
+              <span>{event}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </Card>
   );
 }
@@ -194,7 +220,7 @@ function AboutCard({ bio }: { bio: string }) {
   return (
     <Card className="p-8">
       <SectionHeading>About Me</SectionHeading>
-      <p className="text-slate-600 leading-relaxed whitespace-pre-wrap font-sans">{bio}</p>
+      <p className="text-slate-600 leading-relaxed whitespace-pre-wrap font-body">{bio}</p>
     </Card>
   );
 }
@@ -204,7 +230,7 @@ function HobbiesCard() {
   return (
     <Card className="p-8">
       <SectionHeading>Hobbies &amp; Lifestyle</SectionHeading>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-slate-600 font-sans">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-slate-600 font-body">
         {HOBBY_ITEMS.map(({ icon, title, description }) => (
           <li key={title} className="flex items-start">
             <span className="text-indigo-600 mr-2 mt-0.5 flex-shrink-0">
@@ -260,7 +286,7 @@ export default function ProfilePage() {
         <h1 className="font-display text-6xl md:text-8xl font-bold text-slate-800 uppercase tracking-tight leading-none">
           Profile
         </h1>
-        <p className="font-sans text-slate-500 text-lg font-medium tracking-wide mt-3 pl-2">
+        <p className="font-body text-slate-500 text-lg font-medium tracking-wide mt-3 pl-2">
           私についてと、大切にしている価値観
         </p>
       </header>

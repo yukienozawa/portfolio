@@ -92,15 +92,15 @@ export default function ContactPage() {
 
       <div className="max-w-2xl mx-auto">
 
-      {/* ページヘッダー：Contactページは中央寄せ・上部余白多め */}
-      <header className="mb-16 mt-20 text-center">
-        <h1 className="font-display text-6xl md:text-8xl font-bold text-slate-800 uppercase tracking-tight leading-none">
-          Contact
-        </h1>
-        <p className="font-sans text-[#3c3fbc] text-lg font-medium tracking-wide mt-3">
-          お気軽にお問い合わせください
-        </p>
-      </header>
+        {/* ページヘッダー：Contactページは中央寄せ・上部余白多め */}
+        <header className="mb-16 mt-20 text-center">
+          <h1 className="font-display text-6xl md:text-8xl font-bold text-slate-800 uppercase tracking-tight leading-none">
+            Contact
+          </h1>
+          <p className="font-body text-[#3c3fbc] text-lg font-medium tracking-wide mt-3">
+            お気軽にお問い合わせください
+          </p>
+        </header>
 
         {/* 送信完了メッセージ */}
         {status === "success" && (
@@ -135,7 +135,7 @@ export default function ContactPage() {
         >
           {/* お名前 */}
           <div>
-            <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+            <label htmlFor="name" className="font-body block text-sm font-semibold text-slate-700 mb-2">
               お名前 <span className="text-red-500">*</span>
             </label>
             <input
@@ -151,7 +151,7 @@ export default function ContactPage() {
 
           {/* メールアドレス */}
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+            <label htmlFor="email" className="font-body block text-sm font-semibold text-slate-700 mb-2">
               メールアドレス <span className="text-red-500">*</span>
             </label>
             <input
@@ -167,7 +167,7 @@ export default function ContactPage() {
 
           {/* お問い合わせ内容 */}
           <div>
-            <label htmlFor="message" className="block text-sm font-semibold text-slate-700 mb-2">
+            <label htmlFor="message" className="font-body block text-sm font-semibold text-slate-700 mb-2">
               お問い合わせ内容 <span className="text-red-500">*</span>
             </label>
             <textarea

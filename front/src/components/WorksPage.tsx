@@ -50,10 +50,10 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
         </div>
 
         <div className="p-6 md:p-8 lg:p-10 flex-1 flex flex-col justify-center space-y-4">
-          <h2 className="font-sans text-xl md:text-2xl lg:text-3xl font-black text-slate-800 border-l-4 border-indigo-500 pl-3 leading-snug">
+          <h2 className="font-body text-xl md:text-2xl lg:text-3xl font-black text-slate-800 border-l-4 border-indigo-500 pl-3 leading-snug">
             {achievement.title}
           </h2>
-          <p className="font-sans text-xs md:text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
+          <p className="font-body text-xs md:text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
             {achievement.description}
           </p>
         </div>
@@ -81,8 +81,8 @@ export default function WorksPage() {
           <h1 className="font-display text-6xl md:text-8xl font-bold text-slate-800 uppercase tracking-tight leading-none">
             Works
           </h1>
-          <p className="font-sans text-slate-500 text-lg font-medium tracking-wide mt-3 pl-2">
-            これまでに作ったプロダクトを紹介します<br />
+          <p className="font-body text-[#3c3fbc] text-lg font-medium tracking-wide mt-3 pl-2">
+            これまでに作ったプロダクトをご紹介します<br />
           </p>
         </div>
       </header>
