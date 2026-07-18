@@ -9,8 +9,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useWorks } from "@/hooks/useWorks";
+import PageNav from "@/components/PageNav";
 
 // ============================================================
 // 型定義
@@ -32,6 +32,7 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
   return (
     <li className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow">
       <article className="flex flex-col md:flex-row">
+
         <div className="w-full md:w-1/3 flex-shrink-0">
           <div className="relative w-full h-56 md:h-full min-h-[280px] bg-white flex items-center justify-center text-slate-400 overflow-hidden p-2">
             {achievement.imageUrl ? (
@@ -74,10 +75,16 @@ export default function WorksPage() {
     <div className="h-screen flex flex-col bg-slate-50">
 
       {/* 固定ヘッダー（スクロールしても常に表示） */}
-      <header className="flex-shrink-0 text-center pt-12 pb-8 px-4">
-        <h1 className="font-serif text-4xl md:text-5xl font-bold text-slate-800 mb-4">WORKS</h1>
-        <p className="font-sans text-slate-600 text-lg">これまでに作ったプロダクトたち</p>
-        <div className="w-16 h-1 bg-indigo-600 mx-auto mt-4" />
+      <header className="flex-shrink-0 px-4 pt-6 pb-8 max-w-5xl mx-auto w-full">
+        <PageNav />
+        <div className="mt-2">
+          <h1 className="font-display text-6xl md:text-8xl font-bold text-slate-800 uppercase tracking-tight leading-none">
+            Works
+          </h1>
+          <p className="font-sans text-slate-500 text-lg font-medium tracking-wide mt-3 pl-2">
+            これまでに作ったプロダクトを紹介します<br />
+          </p>
+        </div>
       </header>
 
       {/* 実績一覧（ここだけがスクロール対象） */}
@@ -115,16 +122,6 @@ export default function WorksPage() {
 
         </div>
       </main>
-
-      {/* 固定フッター（トップページへ戻るボタンを常時表示） */}
-      <footer className="flex-shrink-0 text-center py-5 px-4 border-t border-slate-100 bg-white">
-        <Link
-          href="/"
-          className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-100 transition-colors text-sm inline-block"
-        >
-          トップページへ戻る
-        </Link>
-      </footer>
     </div>
   );
 }
