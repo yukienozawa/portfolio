@@ -1,3 +1,8 @@
+// ============================================================
+// このファイルの責務：実績（Achievement）に関するHTTPリクエスト処理のみ
+// 実際のDB操作はachievementService.tsに完全委譲する
+// ============================================================
+
 import { Request, Response } from 'express';
 import { achievementService } from '../services/achievementService';
 

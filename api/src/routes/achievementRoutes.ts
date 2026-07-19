@@ -1,3 +1,9 @@
+// ============================================================
+// このファイルの責務：実績（Achievement）に関するルーティング定義のみ
+// 公開API（一覧取得）と管理者専用API（詳細取得・新規登録・更新）が混在するため、
+// 管理者専用のルートには必ずauthMiddlewareを挟んで保護する
+// ============================================================
+
 import { Router } from 'express';
 import { achievementController } from '../controllers/achievementController';
 import { authMiddleware } from '../middlewares/authMiddleware';
@@ -35,7 +41,6 @@ router.put('/achievements/:id', authMiddleware, achievementController.updateAchi
  * 代わりに、コントローラーを呼び出す直前に `authMiddleware` を挟むことで、
  * トークンがない・不正な場合は、手前で一律「404 Not Found」を返してエンドポイントを隠蔽します。
  */
-//router.post('/achievements', authMiddleware, achievementController.createAchievement);
-router.post('/achievements', achievementController.createAchievement); // 👈 一時的に直接コントローラーを呼ぶ
+router.post('/achievements', authMiddleware, achievementController.createAchievement);
 
 export default router;
