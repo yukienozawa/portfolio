@@ -1,3 +1,9 @@
+// ============================================================
+// このファイルの責務：/admin配下のセッションCookie検証に関するルーティング定義のみ
+// 既存のBearerトークン方式（authMiddleware）とは異なる認証方式のため、
+// 意図的にauthMiddlewareを通さない構成にしている
+// ============================================================
+
 import { Router } from 'express';
 import { createSession, verifySession } from '../controllers/sessionController';
 

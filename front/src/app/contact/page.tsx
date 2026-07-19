@@ -1,9 +1,14 @@
-//問い合わせフォーム
+// ============================================================
+// このファイルの責務：お問い合わせフォームのUI表示と送信処理
+// メンテナンス設定の取得はマウント時に行い、OFF時はフォームの代わりに
+// メンテナンス表示を出し、送信自体もできないようにする
+// ============================================================
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageNav from "@/components/PageNav";
+import { AlertTriangleIcon, WrenchIcon } from "@/components/Icon";
 
 // ============================================================
 // 型定義（PrismaのInquiryモデルのフィールド名に完全準拠させます）
@@ -33,6 +38,32 @@ export default function ContactPage() {
   const [form, setForm] = useState<ContactForm>(INITIAL_FORM);
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // 🔧 お問い合わせ機能のON/OFF状態（メンテナンス判定）
+  const [isContactEnabled, setIsContactEnabled] = useState<boolean>(true);
+  const [isCheckingSetting, setIsCheckingSetting] = useState<boolean>(true);
+
+  // ============================================================
+  // マウント時：お問い合わせ機能が受付中かどうかを確認
+  // ============================================================
+  useEffect(() => {
+    const fetchContactSetting = async () => {
+      try {
+        const res = await fetch("/api/contact-setting");
+        if (!res.ok) throw new Error("設定の取得に失敗しました。");
+
+        const data = await res.json();
+        setIsContactEnabled(data.isEnabled);
+      } catch (error) {
+        // 取得に失敗した場合は、安全側に倒して「受付中」のまま扱う
+        console.error("お問い合わせ設定取得エラー:", error);
+      } finally {
+        setIsCheckingSetting(false);
+      }
+    };
+
+    fetchContactSetting();
+  }, []);
 
   // 入力値の更新
   const handleChange = (
@@ -102,8 +133,18 @@ export default function ContactPage() {
           </p>
         </header>
 
+        {/* メンテナンス中の表示（設定確認が終わり、かつOFFの場合のみ表示） */}
+        {!isCheckingSetting && !isContactEnabled && (
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-10 text-center flex flex-col items-center gap-3">
+            <WrenchIcon className="w-8 h-8 text-slate-400" />
+            <p className="text-slate-600 font-semibold">
+              現在メンテナンス中のため利用できません
+            </p>
+          </div>
+        )}
+
         {/* 送信完了メッセージ */}
-        {status === "success" && (
+        {isContactEnabled && status === "success" && (
           <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm text-center font-medium flex flex-col items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -121,75 +162,78 @@ export default function ContactPage() {
           </div>
         )}
 
-        {errorMessage && (
-          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center font-medium">
-            ⚠️ {errorMessage}
+        {isContactEnabled && errorMessage && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center font-medium flex items-center justify-center gap-2">
+            <AlertTriangleIcon className="w-4 h-4 flex-shrink-0" />
+            {errorMessage}
           </div>
         )}
 
-        {/* お問い合わせフォーム */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-6 hover:shadow-md transition-shadow"
-          noValidate
-        >
-          {/* お名前 */}
-          <div>
-            <label htmlFor="name" className="font-body block text-sm font-semibold text-slate-700 mb-2">
-              お名前 <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="name"
-              name="name" // 👈 form.name にバインド
-              type="text"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="山田 太郎"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          {/* メールアドレス */}
-          <div>
-            <label htmlFor="email" className="font-body block text-sm font-semibold text-slate-700 mb-2">
-              メールアドレス <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="email"
-              name="email" // 👈 form.email にバインド
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="example@email.com"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          {/* お問い合わせ内容 */}
-          <div>
-            <label htmlFor="message" className="font-body block text-sm font-semibold text-slate-700 mb-2">
-              お問い合わせ内容 <span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="message"
-              name="message" // 👈 form.message にバインド
-              value={form.message}
-              onChange={handleChange}
-              placeholder="お問い合わせ内容をご記入ください"
-              rows={6}
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
-            />
-          </div>
-
-          {/* 送信ボタン */}
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        {/* お問い合わせフォーム：受付中（isContactEnabled）の場合のみ表示 */}
+        {isContactEnabled && (
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-6 hover:shadow-md transition-shadow"
+            noValidate
           >
-            {status === "loading" ? "送信中..." : "送信する"}
-          </button>
-        </form>
+            {/* お名前 */}
+            <div>
+              <label htmlFor="name" className="font-body block text-sm font-semibold text-slate-700 mb-2">
+                お名前 <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="name"
+                name="name" // 👈 form.name にバインド
+                type="text"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="山田 太郎"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+
+            {/* メールアドレス */}
+            <div>
+              <label htmlFor="email" className="font-body block text-sm font-semibold text-slate-700 mb-2">
+                メールアドレス <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="email"
+                name="email" // 👈 form.email にバインド
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="example@email.com"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+
+            {/* お問い合わせ内容 */}
+            <div>
+              <label htmlFor="message" className="font-body block text-sm font-semibold text-slate-700 mb-2">
+                お問い合わせ内容 <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="message"
+                name="message" // 👈 form.message にバインド
+                value={form.message}
+                onChange={handleChange}
+                placeholder="お問い合わせ内容をご記入ください"
+                rows={6}
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              />
+            </div>
+
+            {/* 送信ボタン */}
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {status === "loading" ? "送信中..." : "送信する"}
+            </button>
+          </form>
+        )}
       </div>
     </main>
   );

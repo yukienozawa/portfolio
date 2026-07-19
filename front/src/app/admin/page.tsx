@@ -1,4 +1,7 @@
-//管理者ダッシュボードページ
+// ============================================================
+// このファイルの責務：管理者ダッシュボードのUI表示と管理者操作全般
+// 実績・お問い合わせ・プロフィール・サイト設定（お問い合わせON/OFF）を一元管理する
+// ============================================================
 
 "use client";
 
@@ -7,6 +10,7 @@ import "@/lib/firebase";
 import { auth } from "@/lib/firebase";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { PlusIcon, AlertTriangleIcon, SettingsIcon, SparkleIcon, FolderIcon, MailIcon, UserIcon } from "@/components/Icon";
 
 // ============================================================
 // 型定義
@@ -50,6 +54,10 @@ export default function AdminDashboardPage() {
     avatarUrl: "",
     githubUrl: "",
   });
+
+  // 🔧 お問い合わせ機能ON/OFF設定用の状態管理
+  const [isContactEnabled, setIsContactEnabled] = useState<boolean>(true);
+  const [isContactToggling, setIsContactToggling] = useState<boolean>(false);
   
   // アクティブなタブを管理 ('achievements' | 'inquiries' | 'profile')
   const [activeTab, setActiveTab] = useState<"achievements" | "inquiries" | "profile">("achievements");
@@ -63,7 +71,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
 
   // ============================================================
-  // データ取得処理（実績・問い合わせ・プロフィールを一括並列取得）
+  // データ取得処理（実績・問い合わせ・プロフィール・サイト設定を一括並列取得）
   // ============================================================
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -71,24 +79,27 @@ export default function AdminDashboardPage() {
         const idToken = await auth.currentUser?.getIdToken();
         if (!idToken) return;
 
-        // ① 実績、② お問い合わせ、③ プロフィールのAPIをすべて叩く
-        const [resAchievements, resInquiries, resProfile] = await Promise.all([
+        // ① 実績、② お問い合わせ、③ プロフィール、④ お問い合わせ設定のAPIをすべて叩く
+        const [resAchievements, resInquiries, resProfile, resContactSetting] = await Promise.all([
           fetch("/api/admin/achievements", { headers: { Authorization: `Bearer ${idToken}` } }),
           fetch("/api/admin/inquiries", { headers: { Authorization: `Bearer ${idToken}` } }),
           fetch("/api/admin/profile", { headers: { Authorization: `Bearer ${idToken}` } }),
+          fetch("/api/contact-setting"), // 公開APIのため認証ヘッダー不要
         ]);
 
-        if (!resAchievements.ok || !resInquiries.ok || !resProfile.ok) {
+        if (!resAchievements.ok || !resInquiries.ok || !resProfile.ok || !resContactSetting.ok) {
           throw new Error("データの取得に失敗しました。");
         }
 
         const dataAchievements = await resAchievements.json();
         const dataInquiries = await resInquiries.json();
         const dataProfile = await resProfile.json();
+        const dataContactSetting = await resContactSetting.json();
 
         setAchievements(dataAchievements);
         setInquiries(dataInquiries);
         setProfile(dataProfile);
+        setIsContactEnabled(dataContactSetting.isEnabled);
       } catch (error: unknown) {
         console.error("データ取得エラー:", error);
         setErrorMessage("データの取得に失敗しました。");
@@ -106,6 +117,41 @@ export default function AdminDashboardPage() {
 
     return () => unsubscribe();
   }, [router]);
+
+  // ============================================================
+  // お問い合わせ機能ON/OFF切り替え処理
+  // ============================================================
+  const handleContactToggle = async () => {
+    setIsContactToggling(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const nextValue = !isContactEnabled;
+
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) throw new Error("認証トークンの取得に失敗しました。");
+
+      const response = await fetch("/api/admin/contact-setting", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ isEnabled: nextValue }),
+      });
+
+      if (!response.ok) throw new Error("設定の更新に失敗しました。");
+
+      setIsContactEnabled(nextValue);
+      setSuccessMessage(nextValue ? "お問い合わせ機能を再開しました。" : "お問い合わせ機能を停止しました。");
+    } catch (error: unknown) {
+      console.error("お問い合わせ設定更新エラー:", error);
+      setErrorMessage("設定の更新に失敗しました。");
+    } finally {
+      setIsContactToggling(false);
+    }
+  };
 
   // ============================================================
   // プロフィール更新処理（PUT送信）
@@ -141,7 +187,7 @@ export default function AdminDashboardPage() {
 
       if (!response.ok) throw new Error("プロフィールの更新に失敗しました。");
 
-      setSuccessMessage("✨ プロフィールを更新しました！");
+      setSuccessMessage("プロフィールを更新しました！");
     } catch (error: unknown) {
       console.error("プロフィール更新エラー:", error);
       setErrorMessage("プロフィールの更新に失敗しました。");
@@ -181,9 +227,10 @@ export default function AdminDashboardPage() {
         <div className="flex gap-3">
           <Link
             href="/admin/edit"
-            className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors text-center"
+            className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors text-center inline-flex items-center gap-1.5"
           >
-            ➕ 新規実績登録
+            <PlusIcon className="w-4 h-4" />
+            新規実績登録
           </Link>
           <button
             type="button"
@@ -197,47 +244,82 @@ export default function AdminDashboardPage() {
 
       {/* 通知メッセージ */}
       {errorMessage && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
-          ⚠️ {errorMessage}
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-center gap-2">
+          <AlertTriangleIcon className="w-4 h-4 flex-shrink-0" />
+          {errorMessage}
         </div>
       )}
       {successMessage && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm flex items-center gap-2">
+          <SparkleIcon className="w-4 h-4 flex-shrink-0" />
           {successMessage}
         </div>
       )}
 
-      {/* 📂 3タブ切り替えメニュー */}
+      {/* サイト設定カード：お問い合わせ機能のON/OFF切り替え */}
+      <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8 flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+            <SettingsIcon className="w-4 h-4 text-slate-500" />
+            お問い合わせ機能
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">
+            {isContactEnabled
+              ? "現在、Contactページから送信を受け付けています。"
+              : "現在メンテナンス中です。Contactページからの送信を停止しています。"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleContactToggle}
+          disabled={isContactToggling}
+          aria-pressed={isContactEnabled}
+          className={`relative inline-flex h-8 w-14 flex-shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
+            isContactEnabled ? "bg-indigo-600" : "bg-slate-300"
+          }`}
+        >
+          <span
+            className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${
+              isContactEnabled ? "translate-x-7" : "translate-x-1"
+            }`}
+          />
+        </button>
+      </section>
+
+      {/* 3タブ切り替えメニュー */}
       <div className="flex border-b border-slate-200 mb-6 gap-2 overflow-x-auto">
         <button
           onClick={() => { setActiveTab("achievements"); setSuccessMessage(""); }}
-          className={`px-4 py-2.5 font-semibold text-sm transition-all border-b-2 rounded-t-lg whitespace-nowrap ${
+          className={`px-4 py-2.5 font-semibold text-sm transition-all border-b-2 rounded-t-lg whitespace-nowrap inline-flex items-center gap-1.5 ${
             activeTab === "achievements"
               ? "border-indigo-600 text-indigo-600 bg-indigo-50/40"
               : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
           }`}
         >
-          📁 実績マネージャー ({achievements.length})
+          <FolderIcon className="w-4 h-4" />
+          実績マネージャー ({achievements.length})
         </button>
         <button
           onClick={() => { setActiveTab("inquiries"); setSuccessMessage(""); }}
-          className={`px-4 py-2.5 font-semibold text-sm transition-all border-b-2 rounded-t-lg whitespace-nowrap ${
+          className={`px-4 py-2.5 font-semibold text-sm transition-all border-b-2 rounded-t-lg whitespace-nowrap inline-flex items-center gap-1.5 ${
             activeTab === "inquiries"
               ? "border-indigo-600 text-indigo-600 bg-indigo-50/40"
               : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
           }`}
         >
-          ✉️ お問い合わせ受信箱 ({inquiries.length})
+          <MailIcon className="w-4 h-4" />
+          お問い合わせ受信箱 ({inquiries.length})
         </button>
         <button
           onClick={() => { setActiveTab("profile"); setSuccessMessage(""); }}
-          className={`px-4 py-2.5 font-semibold text-sm transition-all border-b-2 rounded-t-lg whitespace-nowrap ${
+          className={`px-4 py-2.5 font-semibold text-sm transition-all border-b-2 rounded-t-lg whitespace-nowrap inline-flex items-center gap-1.5 ${
             activeTab === "profile"
               ? "border-indigo-600 text-indigo-600 bg-indigo-50/40"
               : "border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50"
           }`}
         >
-          👤 プロフィール設定
+          <UserIcon className="w-4 h-4" />
+          プロフィール設定
         </button>
       </div>
 
@@ -314,7 +396,7 @@ export default function AdminDashboardPage() {
           )
         )}
 
-        {/* 👤 3. プロフィール設定タブ（新設・パターン1方式） */}
+        {/* 3. プロフィール設定タブ（新設・パターン1方式） */}
         {activeTab === "profile" && (
           <form onSubmit={handleProfileSubmit} className="p-8 space-y-6 max-w-2xl">
             <div>

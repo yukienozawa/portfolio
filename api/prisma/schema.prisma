@@ -54,3 +54,11 @@ model Inquiry {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// 4. お問い合わせ機能のON/OFF設定を管理するテーブル
+// 常に1行だけを更新して使う想定（新規行は基本的に増やさない）
+model ContactSetting {
+  id        Int      @id @default(autoincrement())
+  isEnabled Boolean  @default(true) // true: 受付中 / false: メンテナンス中（送信停止）
+  updatedAt DateTime @updatedAt
+}
