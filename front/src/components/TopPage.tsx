@@ -41,7 +41,7 @@ function TechBadge({ tech }: { tech: string }) {
 // ============================================================
 
 export default function TopPage() {
-  const { profile } = useProfile();
+  const { profile, isLoading } = useProfile();
 
   return (
     <main className="min-h-screen flex flex-col items-center px-4 pt-6 pb-8 bg-slate-50 font-sans antialiased text-slate-800">
@@ -54,7 +54,10 @@ export default function TopPage() {
 
         {/* 2. プロフィール画像 */}
         <div className="relative w-full h-[450px] md:h-[520px] mb-8 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-indigo-100 flex items-center justify-center">
-          {profile.avatarUrl ? (
+          {isLoading ? (
+            // 読み込み中：背景色だけのプレースホルダー（フォールバック文字は出さない）
+            <div className="w-full h-full bg-indigo-100" />
+          ) : profile.avatarUrl ? (
             <Image
               src={profile.avatarUrl}
               alt={profile.name}
@@ -62,6 +65,7 @@ export default function TopPage() {
               priority
               sizes="(max-w-5xl) 100vw, 1024px"
               className="object-cover object-[center_60%]"
+              unoptimized
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-5xl font-bold select-none">
@@ -98,7 +102,7 @@ export default function TopPage() {
 
         {/* フッター */}
         <footer className="w-full max-w-2xl mx-auto mt-12 pb-2 text-center select-none">
-          <p className="text-[10px] tracking-widest text-slate-400 pl">
+          <p className="text-[10px] tracking-widest text-slate-400">
             Connecting users and technology | © 2026 {profile.name}. All rights reserved.
           </p>
           <div className="flex items-center justify-center gap-3 max-w-xs mt-3 text-[9px] mx-auto">
