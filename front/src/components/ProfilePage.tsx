@@ -49,15 +49,15 @@ interface HobbyItem {
 
 // 基本情報リスト（追加・変更はここだけでOK）
 const PROFILE_ITEMS: ProfileItem[] = [
-  { label: "拠点", value: "新潟県上越市" },
+  { label: "LOCATION", value: "新潟県上越市" },
 ];
 
 // 経歴タイムライン（追加・変更はここだけでOK）
 const HISTORY_ITEMS: HistoryItem[] = [
-  { date: "2026年1月", event: "Ms.Engineer受講開始" },
-  { date: "2026年2月", event: "24年務めた会社を退職" },
-  { date: "2026年4月", event: "コーディングブートキャンプ受講開始" },
-  { date: "2026年7月", event: "コーディングブートキャンプ修了" },
+  { date: "Jan 2026", event: "Ms.Engineer受講開始" },
+  { date: "Feb 2026", event: "24年務めた会社を退職" },
+  { date: "Apr 2026", event: "コーディングブートキャンプ受講開始" },
+  { date: "Jul 2026", event: "コーディングブートキャンプ修了" },
 ];
 
 // 趣味・ライフスタイルリスト（追加・変更はここだけでOK）
@@ -187,11 +187,11 @@ function ProfileCard({ name, avatarUrl }: { name: string; avatarUrl: string }) {
 
       <hr className="border-slate-100 my-6" />
 
-      {/* 拠点 */}
+      {/* Location */}
       <dl className="space-y-4 text-sm text-slate-600 font-body">
         {PROFILE_ITEMS.map(({ label, value }) => (
           <div key={label}>
-            <dt className="font-semibold text-slate-800">{label}</dt>
+            <dt className="font-display text-sm font-bold text-slate-800 uppercase tracking-[0.15em]">{label}</dt>
             <dd>{value}</dd>
           </div>
         ))}
@@ -205,7 +205,7 @@ function ProfileCard({ name, avatarUrl }: { name: string; avatarUrl: string }) {
         <ul className="space-y-3 text-sm text-slate-600 font-body border-l-2 border-slate-100 pl-4">
           {HISTORY_ITEMS.map(({ date, event }) => (
             <li key={date}>
-              <span className="block text-xs text-indigo-600 font-semibold">{date}</span>
+              <span className="block text-xs text-indigo-800 font-semibold">{date}</span>
               <span>{event}</span>
             </li>
           ))}
