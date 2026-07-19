@@ -16,9 +16,9 @@ import PageNav from "@/components/PageNav";
 // ============================================================
 
 const TECH_STACK = [
-  "JavaScript", "TypeScript", "React", "Next.js",
-  "Node.js", "Express.js", "Prisma", "Tailwind CSS",
-  "MySQL", "PostgreSQL", "Docker",
+  "JavaScript", "TypeScript", "React", "Next.js", "Tailwind CSS", "Chakra UI",
+  "Express.js", "Prisma", "MySQL", "PostgreSQL", "Supabase",
+  "Docker", "AWS", "Render", "Stripe", "LINE API",
 ];
 
 // ============================================================
@@ -97,11 +97,11 @@ export default function TopPage() {
         </div>
 
         {/* フッター */}
-        <footer className="w-full max-w-2xl mt-12 pb-2 text-left select-none">
-          <p className="text-[10px] tracking-widest text-slate-400 pl-2">
-            © 2026 {profile.name}. All rights reserved.
+        <footer className="w-full max-w-2xl mx-auto mt-12 pb-2 text-center select-none">
+          <p className="text-[10px] tracking-widest text-slate-400 pl">
+            Connecting users and technology | © 2026 {profile.name}. All rights reserved.
           </p>
-          <div className="flex items-center gap-3 max-w-xs mt-3 text-[9px]">
+          <div className="flex items-center justify-center gap-3 max-w-xs mt-3 text-[9px] mx-auto">
             <div className="h-[1px] w-8 bg-slate-200/30" />
             <Link
               href="/secret-login"
