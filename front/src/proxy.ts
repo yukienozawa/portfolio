@@ -12,20 +12,37 @@ import { NextRequest, NextResponse } from "next/server";
 //   管理画面の存在自体を完全に隠蔽する。
 //
 // [認証方式]
-//   Firebase が発行するセッションCookie（"session"）を検証する。
-//   サーバーサイド（proxy）でCookieの有無を確認し、
-//   厳密な検証は /admin/page.tsx 側でも行う。
+//   Firebase が発行するセッションCookie（"session"）の「存在」だけでなく、
+//   api/側の Firebase Admin SDK で「中身の正当性」も検証する。
+//   （Cookie名が一致するだけの偽装アクセスを防ぐため）
 // ============================================================
 
-export function proxy(request: NextRequest) {
+const API_INTERNAL_URL = process.env.API_INTERNAL_URL || "http://localhost:3001";
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // /admin 配下へのアクセスを監視
   if (pathname.startsWith("/admin")) {
     const sessionCookie = request.cookies.get("session");
+    let isVerified = false;
 
-    // 未認証の場合：リダイレクトせず 404 を描画して存在を隠蔽
-    if (!sessionCookie) {
+    if (sessionCookie) {
+      try {
+        // api側の検証エンドポイントにCookieを転送し、中身の正当性を確認する
+        const verifyRes = await fetch(`${API_INTERNAL_URL}/api/admin/verify-session`, {
+          headers: { Cookie: `session=${sessionCookie.value}` },
+          cache: "no-store",
+        });
+        isVerified = verifyRes.ok;
+      } catch (error) {
+        console.error("🔒 セッション検証APIへの接続に失敗:", error);
+        // フェイルクローズ：API呼び出しに失敗した場合も未認証扱いとする
+      }
+    }
+
+    // 未検証の場合：リダイレクトせず 404 を描画して存在を隠蔽
+    if (!isVerified) {
       const notFoundUrl = request.nextUrl.clone();
       // ⭕ アンダースコアを付けるのがNext.jsの裏ルール！
       notFoundUrl.pathname = "/_not-found";

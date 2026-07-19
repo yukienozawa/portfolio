@@ -34,10 +34,23 @@ export default function AdminLoginPage() {
       // 💡 通行手形（IDトークン）を取得
       const idToken = await user.getIdToken();
 
+      // 🔒 IDトークンをapi側に送り、正式なセッションCookie（JWT）に変換してもらう
+      const sessionRes = await fetch('/api/admin/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!sessionRes.ok) {
+        throw new Error('セッションの作成に失敗しました。');
+      }
+
+      const { sessionCookie } = await sessionRes.json();
+
       // 💡 現在のURLが「localhost」のときは secure を false に、本番（HTTPS）のときは true に自動で切り替えます
       const isSecure = window.location.hostname !== 'localhost';
-      // 💡 ミドルウェアがチェックしている「session」という名前でCookieに保存します（有効期限1日）
-      Cookies.set('session', idToken, { expires: 1, secure: isSecure, sameSite: 'strict' });
+      // 💡 プロキシがチェックしている「session」という名前で、正式なセッションCookieを保存します（有効期限14日）
+      Cookies.set('session', sessionCookie, { expires: 14, secure: isSecure, sameSite: 'strict' });
 
       // ✨ 通行手形を持った状態で、満を持して管理画面へ突入！
       router.push('/admin');

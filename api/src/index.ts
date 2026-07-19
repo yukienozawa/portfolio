@@ -5,6 +5,7 @@ import cors from 'cors';
 import achievementRoutes from './routes/achievementRoutes'; 
 import contactRoutes from './routes/contactRoutes';
 import inquiryRoutes from './routes/inquiryRoutes';
+import sessionRoutes from './routes/sessionRoutes';
 import userRoutes from './routes/userRoutes';
 
 const app = express();
@@ -33,6 +34,11 @@ app.use('/api', userRoutes);        // GET /api/profile, PUT /api/profile
 app.use('/api/admin', achievementRoutes); // GET /api/admin/achievements
 app.use('/api/admin', inquiryRoutes);     // GET /api/admin/inquiries
 app.use('/api/admin', userRoutes);        // GET /api/admin/profile, PUT /api/admin/profile
+
+// 3. セッション検証API（/api/admin/verify-session）
+// ⚠️ 注意：Session Cookie検証そのものが目的の別方式の認証エンドポイントのため、
+//    既存のBearerトークン方式（authMiddleware）は通さず、意図的に扱いを分けている
+app.use('/api/admin', sessionRoutes); // GET /api/admin/verify-session
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
