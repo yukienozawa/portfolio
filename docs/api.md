@@ -10,7 +10,10 @@ assignees: ''
 
 ### 認証・認可ポリシー
 - **公開API**: 認証不要。誰でもアクセス可能。
-- **Admin専用API**: `authMiddleware`（Firebase AuthのセッションCookie検証）が必須。管理者権限がない、または未認証の場合は **HTTP 404 (Not Found)** を返却し、エンドポイント自体の存在を隠匿する。
+- **Admin専用API**: 2種類の認証方式が併存する。
+  - `authMiddleware`：`Authorization: Bearer <Firebase IDトークン>`ヘッダーによる認証（実績・問い合わせ一覧等のAPI呼び出しで使用）
+  - `verifySession`：セッションCookieによる認証（`/admin`ページの表示可否を判定する`proxy.ts`から利用）
+  - どちらも、認証（本人確認）に加えて**MySQL側の`User.role === 'ADMIN'`かどうかの認可チェック**を行う。管理者権限がない、または未認証の場合は **HTTP 404 (Not Found)** を返却し、エンドポイント自体の存在を隠匿する。
 
 > ⚠️ 以前のバージョンの本ドキュメントに記載していたエンドポイントとは、パス・エンドポイント構成が変わっています。旧`POST /api/admin/achievements`のように`/admin`をパスに含める設計は、実装上は採用されていません（後述）。
 
@@ -92,10 +95,10 @@ router.get('/achievements', achievementController.getAchievements);
 
 ## 4. セッション（認証）関連エンドポイント
 
-`sessionController.ts`に以下2つの処理が実装されていますが、対応する**ルーティングファイルの内容が未確認**のため、実際のパスは仮置きです。ルーティング定義（`sessionRoutes.ts`等）を確認して修正してください。
+`sessionRoutes.ts`の実物を確認済み。パスは`/admin`配下にマウントされている（`api/src/index.ts`側のマウント設定と合わせて、実際には`/api/admin/create-session`・`/api/admin/verify-session`になっていると推測されるが、`index.ts`のマウント部分自体は未確認）。
 
 ### ⑦ セッションCookie作成（ログイン時）
-* **Endpoint**: `POST /api/session`（暫定・要確認）
+* **Endpoint**: `POST /api/admin/create-session`
 * **認証要否**: 不要（Firebase IDトークンを検証材料として使うため）
 * **Request Body**:
     ```json
@@ -107,22 +110,26 @@ router.get('/achievements', achievementController.getAchievements);
     ```
 * **有効期限**: 14日間（Firebaseの上限値）
 * **エラーレスポンス**: `idToken`未指定 → `400`、検証失敗 → `401 Unauthorized`
+* **注意**: このエンドポイントは意図的に`authMiddleware`を経由しない（Bearerトークン方式とCookie方式で認証の仕組みが異なるため）。
 
 ### ⑧ セッションCookie検証（`/admin`アクセス時、`proxy.ts`から利用）
-* **Endpoint**: `GET /api/session/verify`（暫定・要確認）
+* **Endpoint**: `GET /api/admin/verify-session`
 * **認証要否**: セッションCookie自体が検証対象
 * **Cookie解析の実装ポイント**: `.split('=')[1]`ではなく`.slice('session='.length)`を使用（base64値に含まれる`=`を誤って切り落とさないための対策）
+* **認可チェック（修正済み）**: 以前はFirebaseセッションが本物かどうか（認証）のみをチェックしており、`role === 'ADMIN'`かどうか（認可）を見ていなかった。`authMiddleware`と同じ基準（MySQL側の`User.role`を確認）を追加済み。
 * **Response**:
-  - 検証成功 → `200 OK { "ok": true }`
-  - Cookie未指定・検証失敗（`checkRevoked: true`でログアウト済み・失効セッションも含む）→ **`404 Not Found`**（`authMiddleware`と同じ「存在の隠蔽」方針）
+  - 検証成功（Cookie正当 かつ role === 'ADMIN'）→ `200 OK { "ok": true }`
+  - Cookie未指定・検証失敗・ADMINロールでない → **`404 Not Found`**（`authMiddleware`と同じ「存在の隠蔽」方針）
 
 ---
 
 ## 5. 問い合わせ送信エンドポイント
 
+`contactController.ts` / `contactService.ts`の実物を確認済み。
+
 * **Endpoint**: `POST /api/contact`
 * **認証要否**: 不要（公開）
-* **Request Body**（`db.md`の`Inquiry`モデルに合わせてフィールド名が変更されている点に注意。旧: `senderName`/`senderEmail`/`messageContent` → 現在の想定: `name`/`email`/`message`）:
+* **Request Body**:
     ```json
     {
       "name": "野澤 太成",
@@ -130,11 +137,48 @@ router.get('/achievements', achievementController.getAchievements);
       "message": "お仕事のご相談です。"
     }
     ```
-* **内部挙動**: `ContactSetting.isEnabled`が`false`の場合は送信を拒否する想定（メンテナンスモード）。DB（`Inquiry`テーブル）へ保存後、Nodemailer経由でメール通知。
-* ⚠️ `contactController.ts` / `contactService.ts`の現在の実装内容は未確認のため、上記は`db.md`のスキーマ変更点から逆算した推測を含みます。実装を確認の上、必要であれば修正してください。
+* **バリデーション（実装順）**:
+  1. `ContactSetting.isEnabled`が`false`の場合、送信を拒否（`403 Forbidden`、メンテナンスモード）
+  2. `name` / `email` / `message`の必須チェック（未入力があれば`400`）
+  3. 文字数上限チェック（`name`は100文字以内、`message`は2000文字以内。超過時は`400`）
+  4. `email`の形式チェック（簡易正規表現、不正な形式は`400`）
+* **内部挙動**: バリデーション通過後、`Inquiry`テーブルへ保存 → Slack Webhook通知（`NOTIFICATION_WEBHOOK_URL`が設定されている場合）→ Gmail経由でのHTML形式メール転送（`GMAIL_USER` / `GMAIL_APP_PASSWORD`が設定されている場合）。メール本文に埋め込む前にユーザー入力を`escapeHtml`でエスケープし、タグインジェクションを防止している。
+* **Response (201 Created)**: 保存された`Inquiry`オブジェクト
 
 ---
 
-## 6. ドキュメントの正確性について
+## 6. お問い合わせ一覧取得エンドポイント（管理者専用）
 
-①〜④（実績関連）は`achievementController.ts`・`achievementService.ts`・`achievementRoutes.ts`の実物を確認済みで、内容は正確です。⑤⑥（ContactSetting）はコントローラー実物を確認済みです。一方、⑦⑧（セッション関連）と5章（問い合わせ送信）は**ルーティングファイル・コントローラーの一部が未確認**のため、パスやフィールド名は推測を含みます。今後、該当ファイルを共有してもらえれば、都度正確な内容に更新します。
+* **Endpoint**: `GET /api/inquiries`
+* **認証要否**: **必要（Admin）**
+* **用途**: 管理画面の受信箱タブへの表示
+* **Response (200 OK)**: `Inquiry[]`（作成日時の降順）
+* **エラーレスポンス**: 未認証・権限不足時 → `404 Not Found`
+
+---
+
+## 7. 管理者プロフィール関連エンドポイント
+
+`userController.ts` / `userRoutes.ts`の実物を確認済み。
+
+### ⑨ 公開プロフィール取得
+* **Endpoint**: `GET /api/profile/public`
+* **認証要否**: 不要（公開。トップページでの表示に使用）
+* **内部挙動**: `role: 'ADMIN'`のユーザーを1件取得して返す
+* **エラーレスポンス**: 該当ユーザーなし → `404`
+
+### ⑩ ログイン中の管理者プロフィール取得
+* **Endpoint**: `GET /api/profile`
+* **認証要否**: **必要（Admin）**
+* **注意（セキュリティ修正済み）**: 以前はレコードが存在しない場合に`role: 'ADMIN'`で自動作成する実装だったが、「初めてログインした人が誰でもADMINになれる」抜け道になるため廃止。現在はレコードが存在しない場合`404`を返すのみで、ADMINユーザーは事前に手動でDBに1件作成しておく運用。
+
+### ⑪ 管理者プロフィール更新
+* **Endpoint**: `PUT /api/profile`
+* **認証要否**: **必要（Admin）**
+* **Request Body**: `name` / `bio` / `avatarUrl` / `githubUrl`
+
+---
+
+## 8. ドキュメントの正確性について
+
+今回、確認対象としていた全コントローラー・全ルーティングファイル（`achievement`・`session`・`contact`・`inquiry`・`user`関連）の実物を確認し終えました。①〜⑪すべて実装済みコードを根拠にした正確な内容です。未確認として残っているのは、`api/src/index.ts`側の各ルーターのマウントプレフィックス（`/api`かどうか等）のみです。
