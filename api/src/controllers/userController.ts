@@ -1,7 +1,16 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+// ============================================================
+// このファイルの責務：管理者ユーザー（User）に関するHTTPリクエスト処理のみ
+// ------------------------------------------------------------
+// 【重要】ADMINレコードの自動作成ロジックは削除済み（セキュリティ対応）
+// 理由：以前はFirebase認証さえ通れば、MySQL側にレコードがない場合に
+//       自動でrole: 'ADMIN'としてユーザーを新規作成していた。
+//       authMiddlewareの認可チェック実装に伴い、この自動作成が
+//       「初めてログインした人が誰でもADMINになれる」抜け道になるため廃止。
+//       ADMINユーザーは、Prisma Studio等を使って手動で1件だけ作成する運用とする。
+// ============================================================
 
-const prisma = new PrismaClient();
+import { Request, Response } from 'express';
+import { prisma } from '../lib/prisma';
 
 // authMiddlewareによってreq.userにFirebaseのユーザー情報が格納されている想定の拡張型
 interface AuthenticatedRequest extends Request {
@@ -25,23 +34,16 @@ export const userController = {
       }
 
       // Firebaseのuidを主キー(id)としてMySQLから検索
-      let user = await prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id: uid },
       });
 
-      // 💡 もしMySQL側にまだあなたのレコード（器）がなければ、その場でお試し初期データを作成
+      // レコードが存在しない場合は、自動作成せずそのままエラーを返す
+      // （authMiddlewareを通過している時点でADMINレコードは存在しているはずだが、
+      //   万が一存在しない場合は、想定外の状態として明示的にエラーを返す）
       if (!user) {
-        user = await prisma.user.create({
-          data: {
-            id: uid,
-            email: req.user?.email || '',
-            name: '管理者',
-            bio: 'ここに自己紹介文を入力してください。',
-            role: 'ADMIN',
-            avatarUrl: '', // 初期状態は空文字（後からGitHubのURLを入れます）
-            githubUrl: '',
-          },
-        });
+        res.status(404).json({ error: 'ユーザー情報が見つかりません。' });
+        return;
       }
 
       res.status(200).json(user);
@@ -70,7 +72,7 @@ export const userController = {
         data: {
           name,
           bio,
-          avatarUrl, // フロントから送られてきたGitHubの画像URLがここに書き込まれます
+          avatarUrl,
           githubUrl,
         },
       });

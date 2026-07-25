@@ -1,7 +1,14 @@
-import { PrismaClient } from '@prisma/client';
-import { mailerTransport } from '../config/mailer';
+// ============================================================
+// このファイルの責務：お問い合わせ（Inquiry）データの保存と、
+// 外部通知（Slack Webhook・Gmail転送メール）のトリガー処理
+// ------------------------------------------------------------
+// 【重要】XSS対策：ユーザー入力（お名前・メールアドレス・本文）は
+// HTMLメール本文に埋め込む前に必ずescapeHtmlでエスケープする
+// （タグインジェクションによるメールクライアント側での不正表示を防止）
+// ============================================================
 
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
+import { mailerTransport } from '../config/mailer';
 
 /**
  * HTML特殊文字をエスケープし、メール本文へのタグ injection を防ぐ
@@ -37,7 +44,6 @@ export const contactService = {
     const webhookUrl = process.env.NOTIFICATION_WEBHOOK_URL;
     if (webhookUrl) {
       try {
-        // 将来的な Slack Block Kit 等の拡張を見据えたリッチな通知ペイロードの作成
         const payload = {
           text: `🔔 【NatuLife】新しいお問い合わせが届きました`,
           attachments: [
@@ -52,14 +58,12 @@ export const contactService = {
           ],
         };
 
-        // 非同期でWebhookを呼び出し（テスト環境等で落ちないようエラーハンドリングを徹底）
         await fetch(webhookUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
       } catch (webhookError) {
-        // 通知の失敗によってユーザーへのレスポンスを巻き添えにしないよう、ログ出力に留める
         console.error('Webhook notification failed:', webhookError);
       }
     }
@@ -67,7 +71,6 @@ export const contactService = {
     // 3. Gmailへのメール転送通知（HTML形式）
     if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
       try {
-        // ユーザー入力をそのままHTMLに埋め込まないよう、事前にエスケープする
         const safeName = escapeHtml(newInquiry.name);
         const safeEmail = escapeHtml(newInquiry.email);
         const safeMessage = escapeHtml(newInquiry.message);
@@ -104,7 +107,6 @@ export const contactService = {
           html: htmlBody,
         });
       } catch (mailError) {
-        // メール送信の失敗によってユーザーへのレスポンスを巻き添えにしないよう、ログ出力に留める
         console.error('Email forwarding failed:', mailError);
       }
     }
