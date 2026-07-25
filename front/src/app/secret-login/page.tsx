@@ -1,4 +1,6 @@
-// 管理者専用のログイン画面コンポーネント（Firebase Authentication連携）
+// ============================================================
+// このファイルの責務：管理者専用ログイン画面（Firebase Authentication連携）
+// ============================================================
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +8,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie'; // 💡 Cookieを操作する道具をインポートしました！
+import Cookies from 'js-cookie';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState<string>('');
@@ -20,21 +22,19 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
 
-    if (email !== 'yukien0313@gmail.com') {
-      setError('管理者権限のないアカウントです。');
-      setLoading(false);
-      return;
-    }
-
     try {
-      // 🚀 Firebaseの認証を実行
+      // ------------------------------------------------------------
+      // 1. Firebaseの認証を実行
+      // ------------------------------------------------------------
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 💡 通行手形（IDトークン）を取得
+      // 通行手形（IDトークン）を取得
       const idToken = await user.getIdToken();
 
-      // 🔒 IDトークンをapi側に送り、正式なセッションCookie（JWT）に変換してもらう
+      // ------------------------------------------------------------
+      // 2. IDトークンをapi側に送り、正式なセッションCookie（JWT）に変換してもらう
+      // ------------------------------------------------------------
       const sessionRes = await fetch('/api/admin/create-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,12 +47,17 @@ export default function AdminLoginPage() {
 
       const { sessionCookie } = await sessionRes.json();
 
-      // 💡 現在のURLが「localhost」のときは secure を false に、本番（HTTPS）のときは true に自動で切り替えます
+      // ------------------------------------------------------------
+      // 3. セッションCookieをブラウザに保存
+      // 現在のURLが「localhost」のときは secure を false に、本番（HTTPS）のときは true に自動で切り替える
+      // プロキシがチェックしている「session」という名前で、正式なセッションCookieを保存する（有効期限14日）
+      // ------------------------------------------------------------
       const isSecure = window.location.hostname !== 'localhost';
-      // 💡 プロキシがチェックしている「session」という名前で、正式なセッションCookieを保存します（有効期限14日）
       Cookies.set('session', sessionCookie, { expires: 14, secure: isSecure, sameSite: 'strict' });
 
-      // ✨ 通行手形を持った状態で、満を持して管理画面へ突入！
+      // ------------------------------------------------------------
+      // 4. 通行手形を持った状態で、管理画面へ遷移
+      // ------------------------------------------------------------
       router.push('/admin');
     } catch (err) {
       if (err instanceof FirebaseError) {
@@ -78,14 +83,14 @@ export default function AdminLoginPage() {
             ポートフォリオ管理画面（裏口）
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           {error && (
             <div className="rounded-md bg-red-50 p-4 text-sm text-red-700 font-medium">
               {error}
             </div>
           )}
-          
+
           <div className="-space-y-px rounded-md shadow-sm">
             <div>
               <label htmlFor="email-address" className="sr-only">メールアドレス</label>
@@ -97,7 +102,7 @@ export default function AdminLoginPage() {
                 value={email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 className="relative block w-full rounded-t-md border-0 py-2.5 px-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                placeholder="yukien0313@gmail.com"
+                placeholder="your-email@example.com"
               />
             </div>
             <div>
