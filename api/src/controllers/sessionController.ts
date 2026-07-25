@@ -1,18 +1,23 @@
 // ============================================================
 // このファイルの責務：/admin配下のセッションCookie検証に関するHTTPリクエスト処理のみ
 // Firebase Admin SDKを使った実際の検証ロジックはこのファイル内で完結させる
-// （DB操作を伴わないシンプルな認証処理のため、service層は設けていない）
+// ------------------------------------------------------------
+// 【重要・修正履歴】verifySessionにrole確認を追加
+// 以前はFirebaseセッションが本物かどうか（認証）のみをチェックしており、
+// role === 'ADMIN'かどうか（認可）を見ていなかった。
+// authMiddleware側は認可チェック済みだが、/adminページの表示可否を
+// 判定するproxy.ts側の入り口（このverifySession）にも同様のチェックが
+// 必要なため、authMiddlewareと同じ基準を追加した。
 // ============================================================
 
 import { Request, Response } from 'express';
 import { auth } from '../config/firebase';
+import { prisma } from '../lib/prisma';
 
 // セッションCookieの有効期限：14日間（Firebaseの上限）
 const SESSION_EXPIRES_IN = 14 * 24 * 60 * 60 * 1000;
 
 // Cookieヘッダーから session の値だけを取り出す簡易パーサー
-// （cookie-parser未導入のため自前実装。値に "=" を含んでいても壊れないよう、
-//   最初の "=" だけで区切る）
 const extractSessionCookie = (cookieHeader?: string): string | undefined => {
   const target = cookieHeader
     ?.split(';')
@@ -46,18 +51,27 @@ export const createSession = async (req: Request, res: Response) => {
 
 /**
  * /admin アクセス時：セッションCookieの中身を検証する（proxy.tsから呼ばれる）
+ * 認証（Firebaseセッションが本物か）に加えて、認可（role === 'ADMIN'か）も確認する
  */
 export const verifySession = async (req: Request, res: Response) => {
   try {
     const sessionCookie = extractSessionCookie(req.headers.cookie);
 
     if (!sessionCookie) {
-      // 🚨 authMiddlewareと同じ方針：未認証は一律404
       return res.status(404).json({ message: 'Not Found' });
     }
 
-    // checkRevoked: true でログアウト済み・失効セッションも弾く
-    await auth.verifySessionCookie(sessionCookie, true);
+    // 1. 認証：checkRevoked: true でログアウト済み・失効セッションも弾く
+    const decodedToken = await auth.verifySessionCookie(sessionCookie, true);
+
+    // 2. 認可：MySQL側でADMINロールかどうかを確認
+    const userRecord = await prisma.user.findUnique({
+      where: { id: decodedToken.uid },
+    });
+
+    if (!userRecord || userRecord.role !== 'ADMIN') {
+      return res.status(404).json({ message: 'Not Found' });
+    }
 
     return res.status(200).json({ ok: true });
   } catch (error) {

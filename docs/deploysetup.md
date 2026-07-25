@@ -100,6 +100,9 @@ export default app;
 - Build Commandはfront側のNext.jsビルドを実行するよう設定
 - 環境変数（`DATABASE_URL`、Firebase関連キー、Gmail SMTP認証情報など）をVercelダッシュボードのEnvironment Variablesに登録
 
+#### ⚠️ FIREBASE_PRIVATE_KEYの改行に関する注意
+`api/src/config/firebase.ts`は、`FIREBASE_PRIVATE_KEY`を読み込む際に`.replace(/\\n/g, '\n')`でエスケープされた`\n`を実際の改行に戻す実装になっている。そのため、Vercelの環境変数入力欄に秘密鍵を貼り付ける際は、**PEM形式の改行がエスケープされた`\n`という2文字の並びとして1行の文字列で保存されるようにする**（実際の改行コードのまま複数行で保存すると、コード側の`.replace()`が効かず、初期化エラーになる可能性がある）。設定後は、Vercelへのデプロイ後に一度ログイン動作を確認し、Firebase Admin SDKの初期化に失敗していないか（サーバーログに`❌ Firebase Admin SDK の初期化でエラーが発生しました`が出ていないか）を確認すること。
+
 ### 3-6. Prisma Client の生成をビルドに組み込む
 Vercelのビルドコマンドに `npx prisma generate` を含める（Prisma Clientの生成漏れによるビルド失敗を防ぐため）。**マイグレーション（`prisma migrate deploy`）はここに含めない**（詳細は6-4）。
 
