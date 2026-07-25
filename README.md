@@ -2,6 +2,8 @@
 
 Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管理画面付きフルスタックアプリケーションです。
 
+リポジトリ: [github.com/yukienozawa/portfolio](https://github.com/yukienozawa/portfolio)
+
 ---
 
 ## 概要
@@ -18,17 +20,20 @@ Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管
 
 - プロフィール情報の表示
 - 実績一覧の動的取得・表示
+- お問い合わせフォーム（DB保存、ON/OFF切り替え機能付き）
 
 ### 管理側
 
 - Firebase Authentication によるログイン認証（実装済）
-- 実績情報の登録・更新・削除（CRUD）（実装中）
+- セッションCookieのFirebase Admin SDKによる検証（実装済）
+- 実績情報の登録・更新・削除（CRUD）（実装済）
 
 ### 品質
 
 - TypeScript（strict mode）
 - ESLint / Prettier
 - セマンティックな命名規則
+- テストカバレッジ計測環境（実装済）
 
 ---
 
@@ -66,10 +71,14 @@ Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管
 - ts-node-dev
 - dotenv
 
-### インフラ
+### インフラ（デプロイ構成）
 
-- AWS（導入予定）
-- Redis（導入予定）
+- **ホスティング**: Vercel（Hobbyプラン）— フロントエンド・バックエンドを1プロジェクトに統合
+- **データベース**: Aiven for MySQL（Free Plan）
+- **認証**: Firebase Authentication
+- **メール送信**: Gmail SMTP + Nodemailer
+
+詳細は [`docs/デプロイsetup.md`](docs/デプロイsetup.md) を参照してください。
 
 ---
 
@@ -90,8 +99,8 @@ root
 ### 1. リポジトリのクローン
 
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/yukienozawa/portfolio.git
+cd portfolio
 ```
 
 ---
@@ -132,7 +141,7 @@ front/.env.local
 api/.env
 ```
 
-必要な環境変数を設定してください。
+必要な環境変数は、それぞれの `.env.example` を参考に設定してください。
 
 ---
 
@@ -189,6 +198,12 @@ npm run test:coverage
 
 ---
 
+## デプロイ
+
+Vercel（フロント・バックエンド統合構成）+ Aiven for MySQLによる完全無料構成でデプロイしています。手順・セキュリティ対策・運用ルールは [`docs/デプロイsetup.md`](docs/デプロイsetup.md) にまとめています。
+
+---
+
 ## ドキュメント
 
 設計・開発ルールは `docs/` 配下で管理します。
@@ -200,19 +215,21 @@ docs/
 ├── db.md
 ├── rules.md
 ├── test.md
-└── screens.md
+├── screens.md
+└── デプロイsetup.md
 ```
 
 ### ドキュメント一覧
 
 | ファイル | 内容 |
 |----------|------|
-| overview.md | システム概要 |
+| overview.md | システム概要・技術構成・開発フロー |
 | api.md | API設計 |
 | db.md | データベース設計 |
-| rules.md | コーディング規約 |
+| rules.md | コーディング規約・Git運用ルール |
 | test.md | テスト戦略 |
 | screens.md | 画面設計 |
+| デプロイsetup.md | デプロイ手順・セキュリティ対策・運用ルール |
 
 ---
 
@@ -227,14 +244,22 @@ docs/
 
 ---
 
+## Git運用
+
+- `develop` を基準に開発を進め、`feature/機能名` ブランチで作業する
+- `main` はリリース済み・デプロイ対象のブランチとして運用する（Vercel Production Branchは`main`を参照）
+- デプロイ前は必ず `develop` → `main` のマージと差分確認を行う
+
+詳細は [`docs/rules.md`](docs/rules.md) を参照してください。
+
+---
+
 ## 今後の実装予定
 
-- 実績管理 CRUD の完成
 - 管理画面機能の拡充
 - Cypress による E2E テスト導入
-- AWS 環境へのデプロイ
-- Redis を利用したキャッシュ機構の導入
-- CI/CD パイプライン構築
+- Redis を利用したキャッシュ機構の導入検討
+- リポジトリのPublic公開
 
 ---
 
