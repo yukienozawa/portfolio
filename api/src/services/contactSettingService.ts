@@ -7,9 +7,7 @@
 // レースコンディションのリスクがあるため、upsertで単一操作にまとめている
 // ============================================================
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 // 常にこのIDの行だけを読み書きする
 const SETTING_ID = 1;
@@ -22,7 +20,7 @@ export const contactSettingService = {
   async getSetting() {
     return prisma.contactSetting.upsert({
       where: { id: SETTING_ID },
-      update: {}, // 既にあれば何も変更せずそのまま返す
+      update: {},
       create: { id: SETTING_ID, isEnabled: true },
     });
   },
