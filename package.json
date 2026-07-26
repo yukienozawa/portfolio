@@ -1,0 +1,29 @@
+{
+  "name": "yukie_section_6-5",
+  "version": "1.0.0",
+  "description": "Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管理画面付きフルスタックアプリケーションです。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+  "dev": "concurrently -n FRONT,API -c blue,green \"npm run dev --prefix front\" \"npm run dev --prefix api\"",
+  "db:up": "docker compose up -d",
+  "db:down": "docker compose down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yukienozawa/portfolio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/yukienozawa/portfolio/issues"
+  },
+  "homepage": "https://github.com/yukienozawa/portfolio#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.4"
+  }
+}
