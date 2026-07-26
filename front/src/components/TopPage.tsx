@@ -2,6 +2,10 @@
 // このファイルの責務：UIの表示のみ
 // データ取得は useProfile フックに完全委譲している
 // API・fetch・useState・useEffect はこのファイルに書かない
+// ------------------------------------------------------------
+// 【設計メモ】本来はページの実体を app/ 配下や features/ 等に
+// 配置するのが望ましいが、途中でのリファクタリングコストを
+// 踏まえ、意図的に components フォルダへの配置を継続している
 // ============================================================
 
 "use client";
@@ -10,6 +14,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useProfile } from "@/hooks/useProfile";
 import PageNav from "@/components/PageNav";
+import Footer from "@/components/Footer";
 
 // ============================================================
 // 定数データ（追加・変更はここだけでOK）
@@ -100,22 +105,20 @@ export default function TopPage() {
           </section>
         </div>
 
-        {/* フッター */}
-        <footer className="w-full max-w-2xl mx-auto mt-12 pb-2 text-center select-none">
-          <p className="text-[10px] tracking-widest text-slate-400">
-            Connecting users and technology | © 2026 {profile.name}. All rights reserved.
-          </p>
-          <div className="flex items-center justify-center gap-3 max-w-xs mt-3 text-[9px] mx-auto">
-            <div className="h-[1px] w-8 bg-slate-200/30" />
-            <Link
-              href="/secret-login"
-              className="text-slate-300/30 hover:text-indigo-500/40 transition-colors tracking-[0.2em] font-light cursor-default"
-            >
-              2026 2nd-STAGE
-            </Link>
-            <div className="h-[1px] w-8 bg-slate-200/30" />
-          </div>
-        </footer>
+        {/* 共通フッター（著作権表示） */}
+        <Footer />
+
+        {/* 管理画面への導線（露出を抑えるため、トップページのみに設置） */}
+        <div className="flex items-center justify-center gap-3 max-w-xs mt-3 text-[9px] mx-auto">
+          <div className="h-[1px] w-8 bg-slate-200/30" />
+          <Link
+            href="/secret-login"
+            className="text-slate-300/30 hover:text-indigo-500/40 transition-colors tracking-[0.2em] font-light cursor-default"
+          >
+            2026 2nd-STAGE
+          </Link>
+          <div className="h-[1px] w-8 bg-slate-200/30" />
+        </div>
       </article>
     </main>
   );

@@ -1,6 +1,10 @@
 // ============================================================
 // このファイルの責務：UIの表示のみ
 // データの取得や状態管理は一切行わない（useProfile カスタムフックに完全委譲）
+// ------------------------------------------------------------
+// 【設計メモ】本来はページの実体を app/ 配下や features/ 等に
+// 配置するのが望ましいが、途中でのリファクタリングコストを
+// 踏まえ、意図的に components フォルダへの配置を継続している
 // ============================================================
 
 "use client";
@@ -9,6 +13,8 @@ import React from "react";
 import Image from "next/image";
 import { useProfile } from "@/hooks/useProfile";
 import PageNav from "@/components/PageNav";
+import Footer from "@/components/Footer";
+
 
 // ============================================================
 // ⚠️ 重要：プロフィール画面の管理方針について
@@ -303,6 +309,8 @@ export default function ProfilePage() {
           <HobbiesCard />
         </section>
       </div>
+
+      <Footer />
     </main>
   );
 }
