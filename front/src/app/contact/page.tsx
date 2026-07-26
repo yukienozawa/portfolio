@@ -9,6 +9,7 @@
 import { useState, useEffect } from "react";
 import PageNav from "@/components/PageNav";
 import { AlertTriangleIcon, WrenchIcon } from "@/components/Icon";
+import Footer from "@/components/Footer";
 
 // ============================================================
 // 型定義（PrismaのInquiryモデルのフィールド名に完全準拠させます）
@@ -235,6 +236,7 @@ export default function ContactPage() {
           </form>
         )}
       </div>
+      <Footer />
     </main>
   );
 }

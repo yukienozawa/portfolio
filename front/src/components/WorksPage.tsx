@@ -4,6 +4,10 @@
 // このファイルの責務：UIの表示のみ
 // データ取得は useWorks フックに完全委譲している
 // API・fetch・useState・useEffect はこのファイルに書かない
+// ------------------------------------------------------------
+// 【設計メモ】本来はページの実体を app/ 配下や features/ 等に
+// 配置するのが望ましいが、途中でのリファクタリングコストを
+// 踏まえ、意図的に components フォルダへの配置を継続している
 // ============================================================
 
 "use client";
@@ -11,6 +15,7 @@
 import Image from "next/image";
 import { useWorks } from "@/hooks/useWorks";
 import PageNav from "@/components/PageNav";
+import Footer from "@/components/Footer";
 
 // ============================================================
 // 型定義
@@ -88,7 +93,7 @@ export default function WorksPage() {
       </header>
 
       {/* 実績一覧（ここだけがスクロール対象） */}
-      <main className="flex-1 overflow-y-auto px-4">
+      <main className="flex-1 overflow-y-auto px-4 pb-8">
         <div className="max-w-5xl mx-auto">
 
           {isLoading && (
@@ -121,6 +126,7 @@ export default function WorksPage() {
           )}
 
         </div>
+         <Footer />
       </main>
     </div>
   );
