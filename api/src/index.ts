@@ -46,3 +46,7 @@ app.use('/api/admin', sessionRoutes); // GET /api/admin/verify-session
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// 【追加】Vercelのサーバーレス関数としてこのExpressアプリを認識させるため、
+// デプロイsetup.md 3-3節の手順通り、末尾でexportする
+export default app;
