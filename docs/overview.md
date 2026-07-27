@@ -31,7 +31,7 @@ assignees: ''
 | **Database** | MySQL | 本番はAiven for MySQL（Free Plan） |
 | **Auth** | Firebase Authentication | Admin SDKを用いたバックエンド/`proxy.ts`双方での二重認可 |
 | **Linter/Formatter**| ESLint (Airbnb), Prettier | 代码品質の自動統一 |
-| **Hosting** | Vercel（Hobbyプラン） | フロント・バックエンドを1プロジェクトに統合。Render等の外部バックエンドサービスは不使用 |
+| **Hosting** | Vercel（Hobbyプラン） | フロント・バックエンドを1プロジェクトに統合。Render等の外部バックエンドサービスは不使用。デプロイは成功済み |
 | **Cache** | Redis | ※Advanced要件（MVP完成後に導入判断） |
 
 ---
@@ -80,13 +80,17 @@ graph TD
     P5_2 --> P5_3[テストカバレッジ計測環境構築]
     class P5_3 done;
 
-    %% デプロイ（現在地）
+    %% デプロイ（実質完了、最終確認のみ残る）
     P5_3 --> P6_1[個人リポジトリへの移行 github.com/yukienozawa/portfolio]
     P6_1 --> P6_2[Vercel統合構成でのデプロイ]
-    P6_2 --> P6_3[本番動作確認]
+    P6_2 --> P6_2a[Prismaバージョン問題の解決 postinstall/build両対応]
+    P6_2a --> P6_2b[vercel.json builds設定によるfront/api分離ビルド]
+    P6_2b --> P6_2c[本番データ移行 Achievement/User]
+    P6_2c --> P6_2d[本番URL確定 環境変数の反映]
+    P6_2d --> P6_3[main反映後の本番動作確認]
     P6_3 --> P6_4[リポジトリをPublicへ切り替え]
-    class P6_1 done;
-    class P6_2,P6_3,P6_4 inprogress;
+    class P6_1,P6_2,P6_2a,P6_2b,P6_2c,P6_2d done;
+    class P6_3,P6_4 inprogress;
 
     %% 最適化・拡張（未着手）
     P6_4 --> P7_1[機能拡張: 画像保存処理の見直し]
@@ -100,3 +104,15 @@ graph TD
 
 - 日常の開発は `develop` を基準に `feature/機能名` ブランチで進める（詳細は `rules.md`）
 - `main` は **リリース済み・デプロイ対象のブランチ**として運用する。Vercelの Production Branch は `main` を参照するため、デプロイ前には必ず `develop` → `main` のマージを行い、乖離がないことを確認する（詳細は `デプロイsetup.md` 4章・6-4節）
+
+---
+
+## 6. 現時点で残っているタスク（2026年7月時点）
+
+デプロイ自体（ビルド成功・Aiven DB接続・本番データ反映・環境変数更新・ドメイン設定）は完了しており、残っているのは以下の最終確認・後片付け系のタスクのみ。
+
+1. `develop` → `main` のPR作成・マージ（Production Branchへの初回反映）
+2. `main`反映後の本番動作確認（Home/Profile/Works/Contact表示、`/admin`未認証時の404確認、お問い合わせフォーム送信テスト）
+3. リポジトリのPublic化
+4. マージ済みローカルブランチの削除（`feature/docs-update`等、多数残存）
+5. E2Eテスト（Cypress）導入、フロント単体テスト基盤構築（デプロイ完了後の課題として先送り）

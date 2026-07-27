@@ -96,7 +96,7 @@ model ContactSetting {
 | `Achievement` | `achievementTitle`→`title`、`imageData`(Base64/Blob想定)→`imageUrl`(URL文字列)にリネーム・方針変更。`category`・`effortPoint`・`siteUrl`・`githubUrl`・`techStack`・`isPublished`（下書き機能用フィールド）を新規追加。**`isPublished`はMVPスコープでは未使用と正式決定**。`createAchievement`実装でも`true`固定で登録され、公開/非公開の出し分けロジックは実装しない。フィールド自体は将来の拡張余地として残す。 |
 | `Inquiry` | `senderName`→`name`、`senderEmail`→`email`、`messageContent`→`message`にリネーム。`receivedAt`は廃止し、`createdAt`/`updatedAt`の標準ペアに統一。 |
 | `ContactSetting` | **新規追加**。お問い合わせフォームのON/OFF（メンテナンスモード）を管理する、常に1行のみのテーブル。 |
-| `Skill` | ⚠️ **現在のスキーマには存在しません**。`screens.md`では「スキール一覧表示」ページ（`/skills`）が設計されていますが、DBモデルとしては未実装です。現状は静的データ（ハードコード）で表示しているか、未着手のいずれかと思われます。実装状況を確認し、必要であればモデルを追加するか、本ドキュメント・`screens.md`側を実態に合わせて修正してください。
+| `Skill` | **意図的に非採用（確認済み）**。`screens.md`では「スキル一覧表示」ページ（`/skills`）が設計されているが、`front/src/components/SkillsPage.tsx`を確認した結果、スキル情報はコンポーネント内にハードコードされた静的データ（`SKILL_CATEGORIES`定数）として管理されており、DBは一切使用していない。頻繁に変更する情報ではないため、DB管理化の必要性が薄いと判断し、意図的に静的データのまま運用している。将来的にスキル情報を管理画面から編集できるようにする場合は、`Skill`モデルの追加を検討する。 |
 
 ---
 
