@@ -65,7 +65,7 @@ function AdminEditForm() {
 
       // ✨ フロントのフォームの形（achievementTitle、imageData）に綺麗に詰め替える
       setForm({
-        achievementTitle: data.title || data.Title || "",
+        achievementTitle: data.title || "",
         description: data.description || "",
         imageData: data.imageUrl || "",
       });
