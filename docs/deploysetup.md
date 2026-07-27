@@ -105,6 +105,7 @@ export default app;
 - Build Commandはfront側のNext.jsビルドを実行するよう設定（詳細は3-6参照）
 - 環境変数（`DATABASE_URL`、Firebase関連キー、Gmail SMTP認証情報など）をVercelダッシュボードのEnvironment Variablesに登録
 - **Vercel Agent（AIコードレビュー機能）は有効化しない**：ダッシュボード上で有効化を促す表示があるが、Pro/Enterprise向けの従量課金制機能であることを確認済み。完全無料構成の方針と矛盾するため、意図的にスキップする
+- **Vercel Authentication（Deployment Protection）は必ず無効のままにする**：Vercelプロジェクト作成時、Settings → Deployment Protectionの「Require Log In」がデフォルトで有効になっている場合がある。これが有効だと、訪問者は`/admin`のセキュリティとは無関係に、サイト全体（公開ページも含む）を見るためにVercelアカウントへのログインを求められてしまう。個人ポートフォリオとして誰でも閲覧できる必要があるため、この設定は必ず無効（OFF）のままにしておくこと。
 
 #### ⚠️ FIREBASE_PRIVATE_KEYの改行に関する注意
 `api/src/config/firebase.ts`は、`FIREBASE_PRIVATE_KEY`を読み込む際に`.replace(/\\n/g, '\n')`でエスケープされた`\n`を実際の改行に戻す実装になっている。そのため、Vercelの環境変数入力欄に秘密鍵を貼り付ける際は、**PEM形式の改行がエスケープされた`\n`という2文字の並びとして1行の文字列で保存されるようにする**（実際の改行コードのまま複数行で保存すると、コード側の`.replace()`が効かず、初期化エラーになる可能性がある）。
