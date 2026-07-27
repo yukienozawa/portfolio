@@ -17,20 +17,28 @@ import { NextRequest, NextResponse } from "next/server";
 //   （Cookie名が一致するだけの偽装アクセスを防ぐため）
 // ============================================================
 
-const API_INTERNAL_URL = process.env.API_INTERNAL_URL || "http://localhost:3001";
-
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // /admin 配下へのアクセスを監視
   if (pathname.startsWith("/admin")) {
+    // ローカル開発時のみ環境変数を使用。Vercel環境（Preview/Production問わず）では
+    // リクエストを受けたデプロイ自身のoriginを使う
+    // （front/apiが同一デプロイのため、これで確実にapi側へ到達できる。
+    //   Vercel上ではNODE_ENVがPreview/Production問わず"production"になるため、
+    //   "development"のときだけ環境変数を使うという判定にしている）
+    const apiOrigin =
+      process.env.NODE_ENV === "development"
+        ? process.env.API_INTERNAL_URL || "http://localhost:3001"
+        : request.nextUrl.origin;
+
     const sessionCookie = request.cookies.get("session");
     let isVerified = false;
 
     if (sessionCookie) {
       try {
         // api側の検証エンドポイントにCookieを転送し、中身の正当性を確認する
-        const verifyRes = await fetch(`${API_INTERNAL_URL}/api/admin/verify-session`, {
+        const verifyRes = await fetch(`${apiOrigin}/api/admin/verify-session`, {
           headers: { Cookie: `session=${sessionCookie.value}` },
           cache: "no-store",
         });
