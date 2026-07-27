@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/yukienozawa/portfolio#readme",
   "devDependencies": {
-    "concurrently": "^10.0.4",
-    "next": "16.2.4"
+    "concurrently": "^10.0.4"
   }
 }
