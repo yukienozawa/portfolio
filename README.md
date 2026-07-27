@@ -68,13 +68,14 @@ Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管
 
 ### 開発支援ツール
 
+- concurrently（front/apiの同時起動）
 - ts-node-dev
 - dotenv
 
 ### インフラ（デプロイ構成）
 
-- **ホスティング**: Vercel（Hobbyプラン）— フロントエンド・バックエンドを1プロジェクトに統合
-- **データベース**: Aiven for MySQL（Free Plan）
+- **ホスティング**: Vercel（Hobbyプラン）— フロントエンド・バックエンドを1プロジェクトに統合。デプロイ済み
+- **データベース**: Aiven for MySQL（Free Plan）。本番データ移行済み
 - **認証**: Firebase Authentication
 - **メール送信**: Gmail SMTP + Nodemailer
 
@@ -86,9 +87,11 @@ Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管
 
 ```text
 root
-├── front/      # Next.js
-├── api/        # Express API
-├── docs/       # 設計ドキュメント
+├── front/          # Next.js
+├── api/            # Express API
+├── docs/           # 設計ドキュメント
+├── compose.yaml    # ローカルMySQL（本番用・テスト用）
+├── package.json    # concurrently等、ルート用の開発支援スクリプト
 └── README.md
 ```
 
@@ -107,18 +110,28 @@ cd portfolio
 
 ### 2. 依存関係のインストール
 
+ルート・フロントエンド・バックエンドの3箇所、それぞれで `npm install` が必要です。
+
+#### ルート（concurrently等の開発支援ツール用）
+
+```bash
+npm install
+```
+
 #### フロントエンド
 
 ```bash
 cd front
 npm install
+cd ..
 ```
 
 #### バックエンド
 
 ```bash
-cd ../api
+cd api
 npm install
+cd ..
 ```
 
 ---
@@ -145,29 +158,58 @@ api/.env
 
 ---
 
-### 4. データベースセットアップ
+### 4. ローカルDBの起動（Docker）
 
-Prisma のマイグレーションを実行します。
+ルートの `npm run db:up` で、`compose.yaml` に定義された本番用DB・テスト用DBのコンテナがまとめて起動します。
 
 ```bash
-cd api
-npx prisma migrate dev --name init
+npm run db:up
 ```
+
+停止する場合は以下を実行します。
+
+```bash
+npm run db:down
+```
+
+> 補足：`docker compose up -d` を直接実行しても同じ結果になりますが、ルートの `package.json` に定義したスクリプト経由での起動を推奨します。
 
 ---
 
-### 5. 開発サーバー起動
+### 5. データベースセットアップ
 
-#### フロントエンド
+**既にマイグレーションファイル（`0_init`等）がリポジトリにコミット済み**のため、新規クローン時は `migrate deploy` で既存のマイグレーションをそのまま適用してください。
 
 ```bash
-cd front
+cd api
+npx prisma migrate deploy
+cd ..
+```
+
+> ⚠️ `npx prisma migrate dev --name init` は実行しないでください。既にマイグレーション履歴が存在する状態でこれを実行すると、意図しない新規マイグレーションが生成される可能性があります。
+>
+> 今後スキーマを変更する場合は、`npx prisma migrate dev --name <変更内容>` で新しいマイグレーションファイルを作成してください（`migrate dev` はスキーマ変更時、`migrate deploy` は既存マイグレーションの適用時、と使い分けます）。
+
+---
+
+### 6. 開発サーバー起動
+
+ルートで以下を実行すると、`concurrently` により front と api の開発サーバーが1つのターミナルで同時に起動します。
+
+```bash
 npm run dev
 ```
 
-#### バックエンド
+#### 補足：個別に起動したい場合
+
+front と api を別々のターミナルで起動したい場合は、以下のように個別実行することもできます。
 
 ```bash
+# ターミナル1
+cd front
+npm run dev
+
+# ターミナル2
 cd api
 npm run dev
 ```
@@ -200,7 +242,7 @@ npm run test:coverage
 
 ## デプロイ
 
-Vercel（フロント・バックエンド統合構成）+ Aiven for MySQLによる完全無料構成でデプロイしています。手順・セキュリティ対策・運用ルールは [`docs/デプロイsetup.md`](docs/デプロイsetup.md) にまとめています。
+Vercel（フロント・バックエンド統合構成）+ Aiven for MySQLによる完全無料構成でデプロイしています。初回デプロイ・本番データ移行は完了しており、現在は最終動作確認中です。手順・セキュリティ対策・運用ルールは [`docs/デプロイsetup.md`](docs/デプロイsetup.md) にまとめています。
 
 ---
 
@@ -256,6 +298,7 @@ docs/
 
 ## 今後の実装予定
 
+- `main`反映後の本番動作確認
 - 管理画面機能の拡充
 - Cypress による E2E テスト導入
 - Redis を利用したキャッシュ機構の導入検討
