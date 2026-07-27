@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev:local": "ts-node src/index.ts",
     "dev": "ts-node-dev --respawn src/index.ts",
     "debug": "ts-node-dev --respawn --transpile-only --inspect=0.0.0.0:9229 src/index.ts",
