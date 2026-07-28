@@ -103,7 +103,7 @@ describe('Achievement APIのテスト', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.id).toBe('abc-123');
-      expect(res.body.Title).toBe('テスト用実績');
+      expect(res.body.title).toBe('テスト用実績');
     });
 
     it('存在しないIDの場合、404が返ること', async () => {
