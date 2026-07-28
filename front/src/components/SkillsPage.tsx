@@ -1,9 +1,15 @@
-import React from "react";
 // ============================================================
 // このファイルの責務：UIの構築・デザインの表現（プレゼンテーション）
 // ルーティングやシステム的な設定には一切関与しない
 // 渡されたデータ（または内部の定数データ）をセマンティックなHTMLで描画することに特化する
+// ------------------------------------------------------------
+// 【設計メモ】本来はページの実体を app/ 配下や features/ 等に
+// 配置するのが望ましいが、途中でのリファクタリングコストを
+// 踏まえ、意図的に components フォルダへの配置を継続している
 // ============================================================
+import React from "react";
+import PageNav from "@/components/PageNav";
+import Footer from "@/components/Footer";
 
 // ============================================================
 // 型定義・定数データ
@@ -94,6 +100,9 @@ const SkillCategoryCard: React.FC<SkillCategory> = ({ category, icon, skills }) 
 export const SkillsPage: React.FC = () => {
   return (
     <main className="max-w-4xl mx-auto px-4 py-12">
+      {/* ナビゲーションタブ（共通コンポーネント、現在地を自動判定） */}
+      <PageNav />
+
       {/* ページヘッダー */}
       <header className="text-center mb-16">
         <h1 className="text-4xl font-bold text-slate-800 mb-4">SKILLS</h1>
@@ -107,6 +116,7 @@ export const SkillsPage: React.FC = () => {
           <SkillCategoryCard key={category.category} {...category} />
         ))}
       </div>
+      <Footer />
     </main>
   );
 };

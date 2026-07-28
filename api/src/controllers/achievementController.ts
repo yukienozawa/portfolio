@@ -1,3 +1,8 @@
+// ============================================================
+// このファイルの責務：実績（Achievement）に関するHTTPリクエスト処理のみ
+// 実際のDB操作はachievementService.tsに完全委譲する
+// ============================================================
+
 import { Request, Response } from 'express';
 import { achievementService } from '../services/achievementService';
 
@@ -48,7 +53,7 @@ export const achievementController = {
       // フロント（Next.js）のフォームが期待する項目名（achievementTitleなど）に綺麗に変換
       const targetAchievement = {
         id: rawAchievement.id,
-        Title: rawAchievement.title, 
+        title: rawAchievement.title, 
         description: rawAchievement.description,
         imageUrl: rawAchievement.imageUrl || '',
       };
