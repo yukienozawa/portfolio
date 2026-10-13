@@ -20,6 +20,8 @@ import Footer from "@/components/Footer";
 // 定数データ（追加・変更はここだけでOK）
 // ============================================================
 
+const DEFAULT_AVATAR_URL = "/images/profile.jpg";
+
 const TECH_STACK = [
   "JavaScript", "TypeScript", "React", "Next.js", "Tailwind CSS", "Chakra UI",
   "Express.js", "Prisma", "MySQL", "PostgreSQL", "Supabase",
@@ -59,16 +61,13 @@ export default function TopPage() {
 
         {/* 2. プロフィール画像 */}
         <div className="relative w-full h-[450px] md:h-[520px] mb-8 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-indigo-100 flex items-center justify-center">
-          {isLoading ? (
-            // 読み込み中：背景色だけのプレースホルダー（フォールバック文字は出さない）
-            <div className="w-full h-full bg-indigo-100" />
-          ) : profile.avatarUrl ? (
+          {isLoading || profile.avatarUrl ? (
             <Image
-              src={profile.avatarUrl}
+              src={profile.avatarUrl || DEFAULT_AVATAR_URL}
               alt={profile.name}
               fill
               priority
-              sizes="(max-w-5xl) 100vw, 1024px"
+              sizes="(max-width: 1024px) 100vw, 1024px"
               className="object-cover object-[center_60%]"
               unoptimized
             />
