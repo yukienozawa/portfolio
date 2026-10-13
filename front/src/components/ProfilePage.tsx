@@ -60,18 +60,17 @@ const PROFILE_ITEMS: ProfileItem[] = [
 
 // 経歴タイムライン（追加・変更はここだけでOK）
 const HISTORY_ITEMS: HistoryItem[] = [
-  { date: "Jan 2026", event: "Ms.Engineer受講開始" },
+  { date: "Jan 2026", event: "Ms.Engineerコーディングブートキャンプ超集中コース受講開始" },
   { date: "Feb 2026", event: "24年務めた会社を退職" },
-  { date: "Apr 2026", event: "コーディングブートキャンプ受講開始" },
-  { date: "Jul 2026", event: "コーディングブートキャンプ修了" },
+  { date: "Jul 2026", event: "Ms.Engineerコーディングブートキャンプ超集中コース修了" },
 ];
 
 // 趣味・ライフスタイルリスト（追加・変更はここだけでOK）
 const HOBBY_ITEMS: HobbyItem[] = [
   {
     icon: "diy",
-    title: "DIY・木工家具製作",
-    description: "1x4や2x4の木材を使い、ワトコオイルやウレタンニスで仕上げる本格的な家具作りが好きです。",
+    title: "DIY木工製作",
+    description: "主に1×4・2×4材を使って、家具や遊具などを作るのが好きです。ホームセンターの資材売り場に行くとワクワクします。",
   },
   {
     icon: "dog",
@@ -85,8 +84,8 @@ const HOBBY_ITEMS: HobbyItem[] = [
   },
   {
     icon: "code",
-    title: "AIドリブン開発",
-    description: "AIにどう開発させるのか、効率的でスピーディーなモダンWeb開発の手法を模索しています。",
+    title: "AIドリブン開発へ",
+    description: "ClaudeなどのAIと相談・壁打ちしながら開発し、生成コードは自分で検証してから採用しています。これから「AIにどう開発させるか」を学び、AIドリブン開発を身につけたいと考えています。",
   },
 ];
 
@@ -184,7 +183,7 @@ function ProfileCard({ name, avatarUrl }: { name: string; avatarUrl: string }) {
         </div>
         <h2 className="font-display text-3xl font-bold text-[#3c3fbc] uppercase tracking-[0.3em]">{name}</h2>
                 <p className="font-body text-sm text-slate-600 font-medium tracking-widest uppercase mt-2">
-          Full-Stack Developer
+          OPERATIONS × WEB DEVELOPMENT
         </p>
         <p className="font-body text-xs text-slate-600 font-medium tracking-widest uppercase mt-1">
           User-Centered, Always.
