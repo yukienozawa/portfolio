@@ -92,6 +92,12 @@ export const userController = {
     try {
       const adminUser = await prisma.user.findFirst({
         where: { role: 'ADMIN' },
+        select: {
+          name: true,
+          bio: true,
+          avatarUrl: true,
+          githubUrl: true,
+        },
       });
 
       if (!adminUser) {
