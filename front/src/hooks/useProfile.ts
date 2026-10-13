@@ -17,6 +17,7 @@ export interface PublicProfile {
   name: string;
   bio: string;
   avatarUrl: string;
+  githubUrl: string;
 }
  
 // ============================================================
@@ -26,8 +27,9 @@ export interface PublicProfile {
 // API取得が遅くても違和感がないようにデフォルト値をセット
 const DEFAULT_PROFILE: PublicProfile = {
   name: "Yukie Nozawa",
-  bio: "長年にわたり、組織のバックボーンを支えるセールスアドミニストレーターおよび調達マネージャーとしてキャリアを築いてきました。業務効率化やプロセス改善に深く携わる中で、「テクノロジーの力で、日常の隠れた不便をもっと本質的に解決したい」という強い想いが芽生え、エンジニアへの転身を決意しました。\n\n現在はフルスタックブートキャンプにて、React、Next.js、TypeScript、Expressなどの現代的なWeb技術を猛勉強中です。日々の暮らしの中にある「本質的な価値（NatuLife）」を形にするアプリケーション開発を目指しています。",
+  bio: "約24年間、全店舗の景品（商品）部門の統括として、業務改善に携わってきました。2026年7月にブートキャンプを修了し、前職の経験とIT知見を活かせる仕事を目指しています。",
   avatarUrl: "",
+  githubUrl: "",
 };
  
 // ============================================================
@@ -61,6 +63,7 @@ export function useProfile() {
           name: data.name,
           bio: data.bio,
           avatarUrl: data.avatarUrl || "",
+          githubUrl: data.githubUrl || "",
         });
       } catch (error) {
         // API 取得失敗時はデフォルト値のまま表示を維持し、エラーフラグを立てる
