@@ -2,6 +2,8 @@
 
 Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管理画面付きフルスタックアプリケーションです。
 
+本番サイト: [yukie-n-portfolio.vercel.app](https://yukie-n-portfolio.vercel.app)
+
 リポジトリ: [github.com/yukienozawa/portfolio](https://github.com/yukienozawa/portfolio)
 
 ---
@@ -34,6 +36,16 @@ Next.js と Express を連携し、Prisma / MySQL でデータ管理を行う管
 - ESLint / Prettier
 - セマンティックな命名規則
 - テストカバレッジ計測環境（実装済）
+
+---
+
+## パフォーマンス・セキュリティ対応
+
+PageSpeed Insights（モバイル）で原因を計測・特定し、小さく修正して効果を確認する流れで改善しています。
+
+- 画像の軽量化、日本語フォントの先読み停止などにより、トップページのスコアを73点から97点に改善（2026年10月計測）
+- 公開APIが返す項目を、表示に必要な4項目（name・bio・avatarUrl・githubUrl）に限定
+- `main` ブランチを保護（削除・強制プッシュの禁止）
 
 ---
 
@@ -242,7 +254,7 @@ npm run test:coverage
 
 ## デプロイ
 
-Vercel（フロント・バックエンド統合構成）+ Aiven for MySQLによる完全無料構成でデプロイしています。初回デプロイ・本番データ移行は完了しており、現在は最終動作確認中です。手順・セキュリティ対策・運用ルールは [`docs/デプロイsetup.md`](docs/デプロイsetup.md) にまとめています。
+Vercel（フロント・バックエンド統合構成）+ Aiven for MySQLによる完全無料構成で、本番稼働中です。手順・セキュリティ対策・運用ルールは [`docs/デプロイsetup.md`](docs/デプロイsetup.md) にまとめています。
 
 ---
 
@@ -298,11 +310,12 @@ docs/
 
 ## 今後の実装予定
 
-- `main`反映後の本番動作確認
+- `/works` のデータ取得をサーバー側に移し、表示速度とレイアウトのずれ（CLS）を改善
+- 実績画像の保存方法の見直し（現在はDBにBase64で保存）
+- Firebase SDK の読み込み範囲の見直し
 - 管理画面機能の拡充
 - Cypress による E2E テスト導入
 - Redis を利用したキャッシュ機構の導入検討
-- リポジトリのPublic公開
 
 ---
 
