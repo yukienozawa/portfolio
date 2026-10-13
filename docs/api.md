@@ -197,8 +197,18 @@ front側は管理画面からの操作を一貫して`/api/admin/...`で呼び�
 
 ### ⑨ 公開プロフィール取得
 * **Endpoint**: `GET /api/profile/public`
-* **認証要否**: 不要（公開。トップページでの表示に使用）
-* **内部挙動**: `role: 'ADMIN'`のユーザーを1件取得して返す
+* **認証要否**: 不要（公開。トップページ・プロフィールページでの表示に使用）
+* **内部挙動**: `role: 'ADMIN'`のユーザーを1件取得し、`select`で**表示に必要な4項目のみ**を返す
+* **Response (200 OK)**:
+```json
+   {
+     "name": "Yukie Nozawa",
+     "bio": "自己紹介文",
+     "avatarUrl": "/images/profile.jpg",
+     "githubUrl": "https://github.com/yukienozawa"
+   }
+```
+* **返さない項目**: `id`・`email`・`role` など（公開APIから個人情報を返さないため、2026年10月に修正）
 * **エラーレスポンス**: 該当ユーザーなし → `404`
 * 補足：`userRoutes`は`/api`と`/api/admin`の両方にマウントされているため`GET /api/admin/profile/public`も同一結果を返すが、公開情報のため`/admin`プレフィックスを付ける意味はなく、front側も`/api/profile/public`を使用している。
 
