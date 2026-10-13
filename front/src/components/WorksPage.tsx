@@ -97,8 +97,12 @@ export default function WorksPage() {
         <div className="max-w-5xl mx-auto">
 
           {isLoading && (
-            <div className="text-center text-slate-400 text-sm py-20">
-              実績データを読み込み中...
+            <div
+              className="grid grid-cols-1 gap-10 pb-8"
+              aria-busy="true"
+              aria-label="実績データを読み込み中"
+            >
+              <div className="bg-white rounded-2xl border border-slate-100 min-h-[280px] animate-pulse" />
             </div>
           )}
 
