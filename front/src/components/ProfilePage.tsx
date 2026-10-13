@@ -160,7 +160,7 @@ function HobbyIcon({ type }: { type: HobbyItem["icon"] }) {
 }
 
 /** 左カラム：基本情報（名前と画像URLを props で受け取る） */
-function ProfileCard({ name, avatarUrl }: { name: string; avatarUrl: string }) {
+function ProfileCard({ name, avatarUrl, githubUrl }: { name: string; avatarUrl: string ; githubUrl: string}) {
   return (
     <Card className="p-6 h-full">
       {/* アバター */}
@@ -194,12 +194,27 @@ function ProfileCard({ name, avatarUrl }: { name: string; avatarUrl: string }) {
 
       {/* Location */}
       <dl className="space-y-4 text-sm text-slate-600 font-body">
-        {PROFILE_ITEMS.map(({ label, value }) => (
+        {PROFILE_ITEMS.map(({ label, value }) => (          
           <div key={label}>
             <dt className="font-display text-sm font-bold text-slate-800 uppercase tracking-[0.15em]">{label}</dt>
             <dd>{value}</dd>
           </div>
         ))}
+        {githubUrl && (
+          <div>
+            <dt className="font-display text-sm font-bold text-slate-800 uppercase tracking-[0.15em]">GITHUB</dt>
+            <dd>
+              <a
+                href={githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-700 hover:underline"
+              >
+                {githubUrl.replace("https://github.com/", "@")}
+              </a>
+            </dd>
+          </div>
+        )}
       </dl>
 
       {/* HISTORY：経歴タイムライン */}
@@ -300,7 +315,7 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-stretch">
 
         <section className="md:col-span-1 h-full">
-          <ProfileCard name={profile.name} avatarUrl={profile.avatarUrl} />
+          <ProfileCard name={profile.name} avatarUrl={profile.avatarUrl} githubUrl={profile.githubUrl} />
         </section>
 
         <section className="md:col-span-2 space-y-8">
